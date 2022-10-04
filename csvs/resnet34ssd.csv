@@ -1,0 +1,106 @@
+LyrName,Type,Stride,OutT(W),OutT(H),OutT(D),OutT(Size),InT(W),InT(H),InT(D),InT(Size),WgtT(W),WgtT(H),WgtT(D),WgtT(Num),WgtT(Size)
+ssd1200/conv1/conv1_bn1/FusedBatchNorm:0,Convolution,2,600,64,600,23040000,1200,1200,3,4320000,7,7,3,64,9408
+ssd1200/conv1/conv1_relu1/conv1_relu1:0,ReLU,0,600,64,600,23040000,600,600,64,23040000,0,0,0,0,0
+ssd1200/pool1/MaxPool:0,MaxPooling_3x3,2,300,64,300,5760000,600,600,64,23040000,0,0,0,0,0
+ssd1200/stage1_residul_block1/stage1_residul_block1_bn1/FusedBatchNorm:0,Convolution,1,300,64,300,5760000,300,300,64,5760000,3,3,64,64,36864
+ssd1200/stage1_residul_block1/stage1_residul_block1_relu1/stage1_residul_block1_relu1:0,ReLU,0,300,64,300,5760000,300,300,64,5760000,0,0,0,0,0
+ssd1200/stage1_residul_block1/stage1_residul_block1_bn2/FusedBatchNorm:0,Convolution,1,300,64,300,5760000,300,300,64,5760000,3,3,64,64,36864
+ssd1200/add:0,Eltwise Add,0,300,64,300,5760000,300,300,64,5760000,0,0,0,0,0
+ssd1200/stage1_residul_block1/stage1_residul_block1_relu2/stage1_residul_block1_relu2:0,ReLU,0,300,64,300,5760000,300,300,64,5760000,0,0,0,0,0
+ssd1200/stage1_residul_block2/stage1_residul_block2_bn1/FusedBatchNorm:0,Convolution,1,300,64,300,5760000,300,300,64,5760000,3,3,64,64,36864
+ssd1200/stage1_residul_block2/stage1_residul_block2_relu1/stage1_residul_block2_relu1:0,ReLU,0,300,64,300,5760000,300,300,64,5760000,0,0,0,0,0
+ssd1200/stage1_residul_block2/stage1_residul_block2_bn2/FusedBatchNorm:0,Convolution,1,300,64,300,5760000,300,300,64,5760000,3,3,64,64,36864
+ssd1200/add_1:0,Eltwise Add,0,300,64,300,5760000,300,300,64,5760000,0,0,0,0,0
+ssd1200/stage1_residul_block2/stage1_residul_block2_relu2/stage1_residul_block2_relu2:0,ReLU,0,300,64,300,5760000,300,300,64,5760000,0,0,0,0,0
+ssd1200/stage1_residul_block3/stage1_residul_block3_bn1/FusedBatchNorm:0,Convolution,1,300,64,300,5760000,300,300,64,5760000,3,3,64,64,36864
+ssd1200/stage1_residul_block3/stage1_residul_block3_relu1/stage1_residul_block3_relu1:0,ReLU,0,300,64,300,5760000,300,300,64,5760000,0,0,0,0,0
+ssd1200/stage1_residul_block3/stage1_residul_block3_bn2/FusedBatchNorm:0,Convolution,1,300,64,300,5760000,300,300,64,5760000,3,3,64,64,36864
+ssd1200/add_2:0,Eltwise Add,0,300,64,300,5760000,300,300,64,5760000,0,0,0,0,0
+ssd1200/stage1_residul_block3/stage1_residul_block3_relu2/stage1_residul_block3_relu2:0,ReLU,0,300,64,300,5760000,300,300,64,5760000,0,0,0,0,0
+ssd1200/stage2_residul_block1_1/stage2_residul_block1_1_bn1/FusedBatchNorm:0,Convolution,2,150,128,150,2880000,300,300,64,5760000,3,3,64,128,73728
+ssd1200/stage2_residul_block1_1/stage2_residul_block1_1_relu1/stage2_residul_block1_1_relu1:0,ReLU,0,150,128,150,2880000,150,150,128,2880000,0,0,0,0,0
+ssd1200/stage2_residul_block1_2/stage2_residul_block1_2_bn1/FusedBatchNorm:0,Convolution,1,150,128,150,2880000,150,150,128,2880000,3,3,128,128,147456
+ssd1200/stage2_downsample/stage2_downsample_bn1/FusedBatchNorm:0,Convolution,2,150,128,150,2880000,300,300,64,5760000,1,1,64,128,8192
+ssd1200/add_3:0,Eltwise Add,0,150,128,150,2880000,150,150,128,2880000,0,0,0,0,0
+ssd1200/stage2_residul_block1_2/stage2_residul_block1_2_relu1/stage2_residul_block1_2_relu1:0,ReLU,0,150,128,150,2880000,150,150,128,2880000,0,0,0,0,0
+ssd1200/stage2_residul_block2/stage2_residul_block2_bn1/FusedBatchNorm:0,Convolution,1,150,128,150,2880000,150,150,128,2880000,3,3,128,128,147456
+ssd1200/stage2_residul_block2/stage2_residul_block2_relu1/stage2_residul_block2_relu1:0,ReLU,0,150,128,150,2880000,150,150,128,2880000,0,0,0,0,0
+ssd1200/stage2_residul_block2/stage2_residul_block2_bn2/FusedBatchNorm:0,Convolution,1,150,128,150,2880000,150,150,128,2880000,3,3,128,128,147456
+ssd1200/add_4:0,Eltwise Add,0,150,128,150,2880000,150,150,128,2880000,0,0,0,0,0
+ssd1200/stage2_residul_block2/stage2_residul_block2_relu2/stage2_residul_block2_relu2:0,ReLU,0,150,128,150,2880000,150,150,128,2880000,0,0,0,0,0
+ssd1200/stage2_residul_block3/stage2_residul_block3_bn1/FusedBatchNorm:0,Convolution,1,150,128,150,2880000,150,150,128,2880000,3,3,128,128,147456
+ssd1200/stage2_residul_block3/stage2_residul_block3_relu1/stage2_residul_block3_relu1:0,ReLU,0,150,128,150,2880000,150,150,128,2880000,0,0,0,0,0
+ssd1200/stage2_residul_block3/stage2_residul_block3_bn2/FusedBatchNorm:0,Convolution,1,150,128,150,2880000,150,150,128,2880000,3,3,128,128,147456
+ssd1200/add_5:0,Eltwise Add,0,150,128,150,2880000,150,150,128,2880000,0,0,0,0,0
+ssd1200/stage2_residul_block3/stage2_residul_block3_relu2/stage2_residul_block3_relu2:0,ReLU,0,150,128,150,2880000,150,150,128,2880000,0,0,0,0,0
+ssd1200/stage2_residul_block4/stage2_residul_block4_bn1/FusedBatchNorm:0,Convolution,1,150,128,150,2880000,150,150,128,2880000,3,3,128,128,147456
+ssd1200/stage2_residul_block4/stage2_residul_block4_relu1/stage2_residul_block4_relu1:0,ReLU,0,150,128,150,2880000,150,150,128,2880000,0,0,0,0,0
+ssd1200/stage2_residul_block4/stage2_residul_block4_bn2/FusedBatchNorm:0,Convolution,1,150,128,150,2880000,150,150,128,2880000,3,3,128,128,147456
+ssd1200/add_6:0,Eltwise Add,0,150,128,150,2880000,150,150,128,2880000,0,0,0,0,0
+ssd1200/stage2_residul_block4/stage2_residul_block4_relu2/stage2_residul_block4_relu2:0,ReLU,0,150,128,150,2880000,150,150,128,2880000,0,0,0,0,0
+ssd1200/stage3_residul_block1/stage3_residul_block1_bn1/FusedBatchNorm:0,Convolution,1,150,256,150,5760000,150,150,128,2880000,3,3,128,256,294912
+ssd1200/stage3_residul_block1/stage3_residul_block1_relu1/stage3_residul_block1_relu1:0,ReLU,0,150,256,150,5760000,150,150,256,5760000,0,0,0,0,0
+ssd1200/stage3_residul_block1/stage3_residul_block1_bn2/FusedBatchNorm:0,Convolution,1,150,256,150,5760000,150,150,256,5760000,3,3,256,256,589824
+ssd1200/stage3_downsample/stage3_downsample_bn1/FusedBatchNorm:0,Convolution,1,150,256,150,5760000,150,150,128,2880000,1,1,128,256,32768
+ssd1200/add_7:0,Eltwise Add,0,150,256,150,5760000,150,150,256,5760000,0,0,0,0,0
+ssd1200/stage3_residul_block1/stage3_residul_block1_relu2/stage3_residul_block1_relu2:0,ReLU,0,150,256,150,5760000,150,150,256,5760000,0,0,0,0,0
+ssd1200/stage3_residul_block2/stage3_residul_block2_bn1/FusedBatchNorm:0,Convolution,1,150,256,150,5760000,150,150,256,5760000,3,3,256,256,589824
+ssd1200/stage3_residul_block2/stage3_residul_block2_relu1/stage3_residul_block2_relu1:0,ReLU,0,150,256,150,5760000,150,150,256,5760000,0,0,0,0,0
+ssd1200/stage3_residul_block2/stage3_residul_block2_bn2/FusedBatchNorm:0,Convolution,1,150,256,150,5760000,150,150,256,5760000,3,3,256,256,589824
+ssd1200/add_8:0,Eltwise Add,0,150,256,150,5760000,150,150,256,5760000,0,0,0,0,0
+ssd1200/stage3_residul_block2/stage3_residul_block2_relu2/stage3_residul_block2_relu2:0,ReLU,0,150,256,150,5760000,150,150,256,5760000,0,0,0,0,0
+ssd1200/stage3_residul_block3/stage3_residul_block3_bn1/FusedBatchNorm:0,Convolution,1,150,256,150,5760000,150,150,256,5760000,3,3,256,256,589824
+ssd1200/stage3_residul_block3/stage3_residul_block3_relu1/stage3_residul_block3_relu1:0,ReLU,0,150,256,150,5760000,150,150,256,5760000,0,0,0,0,0
+ssd1200/stage3_residul_block3/stage3_residul_block3_bn2/FusedBatchNorm:0,Convolution,1,150,256,150,5760000,150,150,256,5760000,3,3,256,256,589824
+ssd1200/add_9:0,Eltwise Add,0,150,256,150,5760000,150,150,256,5760000,0,0,0,0,0
+ssd1200/stage3_residul_block3/stage3_residul_block3_relu2/stage3_residul_block3_relu2:0,ReLU,0,150,256,150,5760000,150,150,256,5760000,0,0,0,0,0
+ssd1200/stage3_residul_block4/stage3_residul_block4_bn1/FusedBatchNorm:0,Convolution,1,150,256,150,5760000,150,150,256,5760000,3,3,256,256,589824
+ssd1200/stage3_residul_block4/stage3_residul_block4_relu1/stage3_residul_block4_relu1:0,ReLU,0,150,256,150,5760000,150,150,256,5760000,0,0,0,0,0
+ssd1200/stage3_residul_block4/stage3_residul_block4_bn2/FusedBatchNorm:0,Convolution,1,150,256,150,5760000,150,150,256,5760000,3,3,256,256,589824
+ssd1200/add_10:0,Eltwise Add,0,150,256,150,5760000,150,150,256,5760000,0,0,0,0,0
+ssd1200/stage3_residul_block4/stage3_residul_block4_relu2/stage3_residul_block4_relu2:0,ReLU,0,150,256,150,5760000,150,150,256,5760000,0,0,0,0,0
+ssd1200/stage3_residul_block5/stage3_residul_block5_bn1/FusedBatchNorm:0,Convolution,1,150,256,150,5760000,150,150,256,5760000,3,3,256,256,589824
+ssd1200/stage3_residul_block5/stage3_residul_block5_relu1/stage3_residul_block5_relu1:0,ReLU,0,150,256,150,5760000,150,150,256,5760000,0,0,0,0,0
+ssd1200/stage3_residul_block5/stage3_residul_block5_bn2/FusedBatchNorm:0,Convolution,1,150,256,150,5760000,150,150,256,5760000,3,3,256,256,589824
+ssd1200/add_11:0,Eltwise Add,0,150,256,150,5760000,150,150,256,5760000,0,0,0,0,0
+ssd1200/stage3_residul_block5/stage3_residul_block5_relu2/stage3_residul_block5_relu2:0,ReLU,0,150,256,150,5760000,150,150,256,5760000,0,0,0,0,0
+ssd1200/stage3_residul_block6/stage3_residul_block6_bn1/FusedBatchNorm:0,Convolution,1,150,256,150,5760000,150,150,256,5760000,3,3,256,256,589824
+ssd1200/stage3_residul_block6/stage3_residul_block6_relu1/stage3_residul_block6_relu1:0,ReLU,0,150,256,150,5760000,150,150,256,5760000,0,0,0,0,0
+ssd1200/stage3_residul_block6/stage3_residul_block6_bn2/FusedBatchNorm:0,Convolution,1,150,256,150,5760000,150,150,256,5760000,3,3,256,256,589824
+ssd1200/add_12:0,Eltwise Add,0,150,256,150,5760000,150,150,256,5760000,0,0,0,0,0
+ssd1200/stage3_residul_block6/stage3_residul_block6_relu2/stage3_residul_block6_relu2:0,ReLU,0,150,256,150,5760000,150,150,256,5760000,0,0,0,0,0
+ssd1200/multibox_head/loc_0/BiasAdd:0,Convolution,3,50,16,50,40000,150,150,256,5760000,0,0,0,0,0
+ssd1200/multibox_head/cls_0/BiasAdd:0,Convolution,3,50,324,50,810000,150,150,256,5760000,0,0,0,0,0
+ssd1200/additional_layers/conv7/conv7_1/BiasAdd:0,Convolution,1,150,256,150,5760000,150,150,256,5760000,0,0,0,0,0
+ssd1200/additional_layers/conv7/conv7_1/Relu:0,ReLU,0,150,256,150,5760000,150,150,256,5760000,0,0,0,0,0
+ssd1200/additional_layers/conv7/conv7_2/BiasAdd:0,Convolution,2,75,512,75,2880000,150,150,256,5760000,0,0,0,0,0
+ssd1200/additional_layers/conv7/conv7_2/Relu:0,ReLU,0,75,512,75,2880000,75,75,512,2880000,0,0,0,0,0
+ssd1200/multibox_head/loc_1/BiasAdd:0,Convolution,3,25,24,25,15000,75,75,512,2880000,0,0,0,0,0
+ssd1200/multibox_head/cls_1/BiasAdd:0,Convolution,3,25,486,25,303750,75,75,512,2880000,0,0,0,0,0
+ssd1200/additional_layers/conv8/conv8_1/BiasAdd:0,Convolution,1,75,256,75,1440000,75,75,512,2880000,0,0,0,0,0
+ssd1200/additional_layers/conv8/conv8_1/Relu:0,ReLU,0,75,256,75,1440000,75,75,256,1440000,0,0,0,0,0
+ssd1200/additional_layers/conv8/conv8_2/BiasAdd:0,Convolution,2,38,512,38,739328,75,75,256,1440000,0,0,0,0,0
+ssd1200/additional_layers/conv8/conv8_2/Relu:0,ReLU,0,38,512,38,739328,38,38,512,739328,0,0,0,0,0
+ssd1200/multibox_head/loc_2/BiasAdd:0,Convolution,3,13,24,13,4056,38,38,512,739328,0,0,0,0,0
+ssd1200/multibox_head/cls_2/BiasAdd:0,Convolution,3,13,486,13,82134,38,38,512,739328,0,0,0,0,0
+ssd1200/additional_layers/conv9/conv9_1/BiasAdd:0,Convolution,1,38,128,38,184832,38,38,512,739328,0,0,0,0,0
+ssd1200/additional_layers/conv9/conv9_1/Relu:0,ReLU,0,38,128,38,184832,38,38,128,184832,0,0,0,0,0
+ssd1200/additional_layers/conv9/conv9_2/BiasAdd:0,Convolution,2,19,256,19,92416,38,38,128,184832,0,0,0,0,0
+ssd1200/additional_layers/conv9/conv9_2/Relu:0,ReLU,0,19,256,19,92416,19,19,256,92416,0,0,0,0,0
+ssd1200/multibox_head/loc_3/BiasAdd:0,Convolution,3,7,24,7,1176,19,19,256,92416,0,0,0,0,0
+ssd1200/multibox_head/cls_3/BiasAdd:0,Convolution,3,7,486,7,23814,19,19,256,92416,0,0,0,0,0
+ssd1200/additional_layers/conv10/conv10_1/BiasAdd:0,Convolution,1,19,128,19,46208,19,19,256,92416,0,0,0,0,0
+ssd1200/additional_layers/conv10/conv10_1/Relu:0,ReLU,0,19,128,19,46208,19,19,128,46208,0,0,0,0,0
+ssd1200/additional_layers/conv10/conv10_2/BiasAdd:0,Convolution,2,9,256,9,20736,19,19,128,46208,0,0,0,0,0
+ssd1200/additional_layers/conv10/conv10_2/Relu:0,ReLU,0,9,256,9,20736,9,9,256,20736,0,0,0,0,0
+ssd1200/multibox_head/loc_4/BiasAdd:0,Convolution,3,3,16,3,144,9,9,256,20736,0,0,0,0,0
+ssd1200/multibox_head/cls_4/BiasAdd:0,Convolution,3,3,324,3,2916,9,9,256,20736,0,0,0,0,0
+ssd1200/additional_layers/conv11/conv11_1/BiasAdd:0,Convolution,1,9,128,9,10368,9,9,256,20736,0,0,0,0,0
+ssd1200/additional_layers/conv11/conv11_1/Relu:0,ReLU,0,9,128,9,10368,9,9,128,10368,0,0,0,0,0
+ssd1200/additional_layers/conv11/conv11_2/BiasAdd:0,Convolution,1,7,256,7,12544,9,9,128,10368,0,0,0,0,0
+ssd1200/additional_layers/conv11/conv11_2/Relu:0,ReLU,0,7,256,7,12544,7,7,256,12544,0,0,0,0,0
+ssd1200/multibox_head/loc_5/BiasAdd:0,Convolution,3,3,16,3,144,7,7,256,12544,0,0,0,0,0
+ssd1200/multibox_head/cls_5/BiasAdd:0,Convolution,3,3,324,3,2916,7,7,256,12544,0,0,0,0,0
+ssd1200/concat_1:0,Concat,0,0,0,0,0,3,3,16,144,0,0,0,0,0
+ssd1200/concat:0,Concat,0,0,0,0,0,3,3,324,2916,0,0,0,0,0
+concat:0,Concat,0,0,0,0,0,3,3,16,144,0,0,0,0,0
