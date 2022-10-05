@@ -1,5 +1,5 @@
 #IMPORTS
-import util
+import MBR_sim.util
 import math
 # Main simulation file
 

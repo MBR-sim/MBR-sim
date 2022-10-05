@@ -1,5 +1,5 @@
 #IMPORTS
-import util
+import MBR_sim.util
 
 
 def fuse_simd(graph, hw_cfg):

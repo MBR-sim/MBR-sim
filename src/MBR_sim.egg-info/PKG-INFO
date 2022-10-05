@@ -1,0 +1,19 @@
+Metadata-Version: 2.1
+Name: MBR-sim
+Version: 0.0.3
+Summary: A Speed-of-Light Model for ML Accelerators
+Author-email: Ben Maydan <maydanb@gmail.com>, Mehul Goel <mehulg6th@gmail.com>, Raj Parihar <prince.parihar@gmail.com>
+Project-URL: Homepage, https://github.com/mehulgoel873/MBR-sim
+Project-URL: Bug Tracker, https://github.com/mehulgoel873/MBR-sim/issues
+Classifier: Programming Language :: Python :: 3
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.7
+Description-Content-Type: text/markdown
+License-File: LICENSE
+
+# MBR-SIM: A Speed-of-Light Model for ML Accelerators
+
+Sample Command:
+python3 src/mbr-sim.py workloads/csv/ResNet50.csv 512 32 16 64
+
+Authors: Ben Maydan, Mehul Goel, Raj Parihar

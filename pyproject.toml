@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "MBR_sim"
+version = "0.0.3"
+authors = [
+  { name="Ben Maydan", email="maydanb@gmail.com" },
+  { name="Mehul Goel", email="mehulg6th@gmail.com"},
+  { name="Raj Parihar", email="prince.parihar@gmail.com"}
+]
+description = "A Speed-of-Light Model for ML Accelerators"
+readme = "README.md"
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/mehulgoel873/MBR-sim"
+"Bug Tracker" = "https://github.com/mehulgoel873/MBR-sim/issues"

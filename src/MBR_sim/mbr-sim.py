@@ -1,9 +1,9 @@
 # Main python file
 #IMPORTS
 import configparser
-import mapper
+import MBR_sim.mapper
 import simulate
-import util
+import MBR_sim.util
 import sys
 
 

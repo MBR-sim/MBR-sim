@@ -6,8 +6,8 @@
 from cmath import nan
 from doctest import OutputChecker
 import pandas as pd
-from util import *
-import fusion
+from MBR_sim.util import *
+import MBR_sim.fusion
 
 class Mapper:
     def __init__(self, hw_cfg) -> None:
