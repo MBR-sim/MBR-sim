@@ -1,3 +1,5 @@
+#IMPORTS
+import math 
 # Node and Graph Class
 
 linearTypes = ["Convolution"]
@@ -12,6 +14,7 @@ class Node ():
         self.op_type = None
         self.data_type = None
         self.tiles = None
+        self.tile = None
     
         self.input_t_size = None #(W, H, D, Size)
         self.output_t_size = None #(W, H, D, Size)
@@ -63,6 +66,25 @@ class Graph():
             node.print_node()
             print()
   
+def tileToPos(hw_cfg, tile):
+    print(tile)
+    tile -= 1
+    num_tiles = int(hw_cfg['SYSTEM']['TILES'])
+    rows, cols = factint(num_tiles)
+    print(rows, cols)
+    row = tile//cols
+    col = tile%rows if row %2 == 0 else (cols - tile%rows - 1)
+    print(row, col)
+    print()
+    return int(row),int(col)
+
+def factint(n):
+    pos_n = abs(n)
+    max_candidate = int(math.sqrt(pos_n))
+    for candidate in range(max_candidate, 0, -1):
+        if pos_n % candidate == 0:
+            break
+    return candidate, n //candidate
 
 
 

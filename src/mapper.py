@@ -24,6 +24,7 @@ class Mapper:
         for WgtT in df['WgtT(Size)']: df['WgtT(Size)'].replace({WgtT : str(WgtT).replace(",", "")}, inplace=True)
 
         self.graph = Graph("graph")
+        i = 1
         for index, row in df.iterrows():
             node = Node(row['LyrName'])
             node.op_type = row['Type']
@@ -31,7 +32,9 @@ class Mapper:
             node.input_t_size = (row['InT(W)'], row['InT(H)'], row['InT(D)'], row['InT(Size)'])
             if (not row.isnull().any()):
                 node.weight_t_size = (int(row['WgtT(W)']), int(row['WgtT(H)']), int(row['WgtT(D)']), int(row['WgtT(Num)']), int(row['WgtT(Size)']))
+            node.tile = i
             self.graph.add_node(node)
+            i += 1
         return self.graph
     
     def fuse_nodes(self):
