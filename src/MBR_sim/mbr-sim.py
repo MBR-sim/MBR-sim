@@ -5,6 +5,7 @@ import MBR_sim.mapper
 import simulate
 import MBR_sim.util
 import sys
+import visual
 
 
 # All the command line options
@@ -12,8 +13,6 @@ import sys
 
 
 def main():
-
-
    hw_config_file = "configs/hw_config1.cfg"
    hw_cfg = configparser.ConfigParser()
    hw_cfg.read(hw_config_file)
@@ -44,6 +43,7 @@ def main():
       node.layer_cycles = max(node.load_cycles, node.simd_cycles, node.linear_cycles, node.store_cycles)
       node.tiles = 1
       node.stage_cycles = node.layer_cycles//node.tiles
+   graph.print_nodes()
 
    #Finding Totals
    tot_MACS = 0
@@ -68,6 +68,8 @@ def main():
    print("Total Cycles: {:.2e}".format(tot_lyr_cycles))
    print("Total Stage Cycles: {:.2e}".format(tot_stage_cycles))
    print("IPS/Chip: {}".format((int(hw_cfg['SYSTEM']['FREQ'])//tot_stage_cycles)) * (int(hw_cfg['SYSTEM']['TILES'])//tot_tiles))
+
+   visual.resource_table(hw_cfg, graph)
 
 if __name__ == "__main__":
    main()
