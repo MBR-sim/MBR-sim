@@ -4,6 +4,7 @@ import configparser
 import mapper
 import simulate
 import util
+import sys
 
 
 # All the command line options
@@ -11,19 +12,25 @@ import util
 
 
 def main():
+
+
    hw_config_file = "configs/hw_config1.cfg"
    hw_cfg = configparser.ConfigParser()
    hw_cfg.read(hw_config_file)
+
+   csv_file = sys.argv[1]
+   hw_cfg['TILE']['MAC_BW'] = sys.argv[2]
+   hw_cfg['TILE']['NOC_BW'] = sys.argv[4]
+   hw_cfg['TILE']['SIMD_BW'] = sys.argv[3]
+   hw_cfg['SYSTEM']['TILES'] = sys.argv[5]
    
    #INITS
    map = mapper.Mapper(hw_cfg)
-   
-   csv_file = "csvs/ResNet50.csv"
+
    graph = map.generate_nodes(csv_file)
    
    simulate.calculateSIMDCycles(graph, hw_cfg)
    simulate.calculateMACS(graph, hw_cfg)
-   print(graph)
 
    graph = map.fuse_nodes()
 
