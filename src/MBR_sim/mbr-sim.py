@@ -20,10 +20,10 @@ def main(args):
 
    #Update this to Argument Parser
    csv_file = args.csv
-   hw_cfg['TILE']['MAC_BW'] = str(args.macbw)
-   hw_cfg['TILE']['NOC_BW'] = str(args.nocbw)
-   hw_cfg['TILE']['SIMD_BW'] = str(args.simdbw)
-   hw_cfg['SYSTEM']['TILES'] = str(args.numtiles)   
+   if (args.macbw is not None): hw_cfg['TILE']['MAC_BW'] = str(args.macbw)
+   if (args.nocbw is not None): hw_cfg['TILE']['NOC_BW'] = str(args.nocbw)
+   if (args.simdbw is not None): hw_cfg['TILE']['SIMD_BW'] = str(args.simdbw)
+   if (args.numtiles is not None): hw_cfg['SYSTEM']['TILES'] = str(args.numtiles)   
    #INITS
    map = mapper.Mapper(hw_cfg)
 

@@ -33,6 +33,12 @@ class Node ():
         self.input_deps = None
         self.output_deps = None
 
+    def calculateVolumes(self):
+        self.input_t_size += (math.prod(self.input_t_size),)
+        self.output_t_size += (math.prod(self.output_t_size),)
+        if self.weight_t_size is not None:
+            self.weight_t_size += (math.prod(self.weight_t_size),)
+
     # Method
     def print_node(self):
         print("Name: {}, UID: {}".format(self.name, self.uid))
