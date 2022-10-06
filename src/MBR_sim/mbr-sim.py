@@ -6,25 +6,24 @@ import simulate
 import MBR_sim.util as util
 import sys
 import visual
+import argparse
 
 
 # All the command line options
  
 
 
-def main():
+def main(args):
    #Assign unique Conv ID.
-   hw_config_file = "src/MBR_sim/configs/hw_config1.cfg" #Should become a knob
    hw_cfg = configparser.ConfigParser()
-   hw_cfg.read(hw_config_file)
+   hw_cfg.read(args.config)
 
    #Update this to Argument Parser
-   csv_file = sys.argv[1]
-   hw_cfg['TILE']['MAC_BW'] = sys.argv[2]
-   hw_cfg['TILE']['NOC_BW'] = sys.argv[4]
-   hw_cfg['TILE']['SIMD_BW'] = sys.argv[3]
-   hw_cfg['SYSTEM']['TILES'] = sys.argv[5]
-   
+   csv_file = args.csv
+   hw_cfg['TILE']['MAC_BW'] = str(args.macbw)
+   hw_cfg['TILE']['NOC_BW'] = str(args.nocbw)
+   hw_cfg['TILE']['SIMD_BW'] = str(args.simdbw)
+   hw_cfg['SYSTEM']['TILES'] = str(args.numtiles)   
    #INITS
    map = mapper.Mapper(hw_cfg)
 
@@ -79,4 +78,13 @@ def main():
    visual.resource_table(hw_cfg, graph)
 
 if __name__ == "__main__":
-   main()
+   parser = argparse.ArgumentParser()
+   parser.add_argument("-c", "--config", help = "the path to the hardware config file", type=str, default="src/MBR_sim/configs/hw_config1.cfg")
+   parser.add_argument("-f", "--csv", help = "the path to the csv file of the workload", type=str, default="src/MBR_sim/workloads/csv/ResNet50.csv")
+   parser.add_argument("-p", "--parallelism", help = "Choose between tensor or pipeline parrallelism", choices=["tensor","pipeline"], type=str, default="pipeline")
+   parser.add_argument("-m", "--macbw", help = "the mac bandwidth of the hardware, if not entered, uses hw_cfg", type=int)
+   parser.add_argument("-b", "--nocbw", help = "the noc bandwidth of the hardware, if not entered, uses hw_cfg", type=int)
+   parser.add_argument("-s", "--simdbw", help = "the simd bandwidth of the hardware, if not entered, uses hw_cfg", type=int)
+   parser.add_argument("-n", "--numtiles", help = "the number of tiles in the hardware, if not entered, uses hw_cfg", type=int)
+   args = parser.parse_args()
+   main(args)
