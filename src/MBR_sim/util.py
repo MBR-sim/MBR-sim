@@ -27,6 +27,7 @@ class Node ():
         self.simd_cycles = 0
         self.linear_cycles = 0
         self.layer_cycles = 0
+        self.stage_cycles = 0
         self.MACS = 0
         
         self.input_deps = None
@@ -42,6 +43,32 @@ class Node ():
             print("SIMD Cycles: {}".format(self.simd_cycles))
         if self.MACS:
             print("MACS: {}".format(self.MACS))
+    
+    def copy(self):
+        newNode = Node(self.name)
+        newNode.op_type = self.op_type
+        newNode.data_type = self.data_type
+        newNode.tiles = self.tiles
+        newNode.tile = self.tile
+    
+        newNode.input_t_size = self.input_t_size #(W, H, D, Size)
+        newNode.output_t_size = self.output_t_size #(W, H, D, Size)
+        newNode.weight_t_size = self.weight_t_size #(W, H, D, N, Size)
+        newNode.ops_cnt = self.ops_cnt
+        
+        newNode.compute_cycles = self.compute_cycles
+        newNode.load_cycles = self.load_cycles
+        newNode.store_cycles = self.store_cycles
+        newNode.simd_cycles = self.simd_cycles
+        newNode.linear_cycles = self.linear_cycles
+        newNode.layer_cycles = self.layer_cycles
+        newNode.stage_cycles = self.stage_cycles
+        newNode.MACS = self.MACS
+        
+        newNode.input_deps = self.input_deps
+        newNode.output_deps = self.output_deps
+        return newNode
+
 
 class Graph():
     def __init__(self, name):

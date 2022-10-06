@@ -1,5 +1,5 @@
 #IMPORTS
-import MBR_sim.util
+import MBR_sim.util as util
 
 
 def fuse_simd(graph, hw_cfg):
@@ -30,7 +30,7 @@ def fuse_simd(graph, hw_cfg):
     graph.nodes = fused_nodes
     return graph
 
-def fuse_linear(graph):
+def inline_linear_simd(graph):
     fused_nodes = []
     i = 0
     while len(graph.nodes) > 1:
@@ -60,8 +60,30 @@ def fuse_linear(graph):
     return graph
 
 
-
-
-
-
+def split_layers(graph, hw_cfg):
+    if (len(graph.nodes) < int(hw_cfg['SYSTEM']['TILES'])):
+        while len(graph.nodes) != int(hw_cfg['SYSTEM']['TILES']):
+            graph.nodes.sort(key = lambda node: node.stage_cycles)
+            largest_node = graph.nodes[0]
+            largest_node_0 = largest_node.copy()
+            largest_node_1 = largest_node.copy()
+            largest_node_0.name = largest_node_0.name.split("_")[0] + "_".join(largest_node_0.name.split("_")[1:]) + "_0"
+            largest_node_1.name = largest_node_1.name.split("_")[0] + "_".join(largest_node_1.name.split("_")[1:]) + "_1"
             
+            largest_node_0.stage_cycles //= 2
+
+'''
+1. Look at smallest layer, look at before and after. 
+    ex: 50 is smallest, fuse with 49 or 51?
+    Recursive
+'''
+def fuse_multiple_layers(graph, hw_cfg):
+    while (len(graph.nodes) > int(hw_cfg['SYSTEM']['TILES'])):
+        graph.nodes.sort(key=lambda node: node.stage_cycles)
+        smallest_node_0 = graph.nodes.pop(-1)            
+        smallest_node_1 = graph.nodes.pop(-2)
+        combined_node = smallest_node_0.copy()
+        combined_node.tile = 1
+        combined_node.output_t_size = smallest_node_1.output_t_size
+        combined_node.stage_cycles = smallest_node_0.stage_cycles + smallest_node_1.stage_cycles
+        graph.nodes.append(combined_node)

@@ -21,9 +21,9 @@ def resource_table(hw_cfg, graph):
                 row.append("")
         cellText.append(row)
     
-    plt.rcParams["figure.figsize"] = [7.00, 3.50]
+    plt.rcParams["figure.figsize"] = [100.00, 100.50]
     plt.rcParams["figure.autolayout"] = True
-    fig, ax = plt.subplots() 
+    fig, ax = plt.subplots()
     ax.axis('tight')
     ax.set_axis_off() 
     table = ax.table( 

@@ -7,7 +7,7 @@ from cmath import nan
 from doctest import OutputChecker
 import pandas as pd
 from MBR_sim.util import *
-import MBR_sim.fusion
+import MBR_sim.fusion as fusion
 
 class Mapper:
     def __init__(self, hw_cfg) -> None:
@@ -40,6 +40,7 @@ class Mapper:
     def fuse_nodes(self):
         fusion.fuse_simd(self.graph, self.hw_cfg)
         fusion.fuse_linear(self.graph)
+        fusion.fuse_multiple(self.graph, self.hw_cfg)
         return self.graph
 
 

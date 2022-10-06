@@ -1,9 +1,9 @@
 # Main python file
 #IMPORTS
 import configparser
-import MBR_sim.mapper
+import MBR_sim.mapper as mapper
 import simulate
-import MBR_sim.util
+import MBR_sim.util as util
 import sys
 import visual
 
@@ -13,10 +13,12 @@ import visual
 
 
 def main():
-   hw_config_file = "configs/hw_config1.cfg"
+   #Assign unique Conv ID.
+   hw_config_file = "src/MBR_sim/configs/hw_config1.cfg" #Should become a knob
    hw_cfg = configparser.ConfigParser()
    hw_cfg.read(hw_config_file)
 
+   #Update this to Argument Parser
    csv_file = sys.argv[1]
    hw_cfg['TILE']['MAC_BW'] = sys.argv[2]
    hw_cfg['TILE']['NOC_BW'] = sys.argv[4]
@@ -33,6 +35,7 @@ def main():
 
    graph = map.fuse_nodes()
 
+   #Knob for Pipeline Parrallelism
    for node in graph.nodes:
       node.load_cycles = node.input_t_size[3]//int(hw_cfg['TILE']['NOC_BW'])
       node.store_cycles = node.output_t_size[3]//int(hw_cfg['TILE']['NOC_BW'])
@@ -43,6 +46,10 @@ def main():
       node.layer_cycles = max(node.load_cycles, node.simd_cycles, node.linear_cycles, node.store_cycles)
       node.tiles = 1
       node.stage_cycles = node.layer_cycles//node.tiles
+
+   #Knob for Tensor Parrallelism
+   # Take layer cycles  = orig layer cycles/tiles
+   # Sum all layer cycles
    graph.print_nodes()
 
    #Finding Totals
