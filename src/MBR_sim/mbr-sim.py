@@ -22,14 +22,17 @@ def main(args):
    map = mapper.Mapper(hw_cfg)
 
    graph = map.generate_nodes(csv_file)
+   graph.print_nodes()
    
    simulate.calculateSIMDCycles(graph, hw_cfg)
    simulate.calculateMACS(graph, hw_cfg)
+   graph.print_nodes()
 
    for node in graph.nodes:
       node.calculatePerf(hw_cfg)
 
    graph = map.fuse_nodes()
+   graph.print_nodes()
 
    for node in graph.nodes:
       node.calculatePerf(hw_cfg)

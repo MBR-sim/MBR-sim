@@ -94,7 +94,7 @@ def spread_layers(graph, hw_cfg):
             split_node = largest_node.copy()
             if (split_node.name[-3:-1] == "__"): split_node.name = name.split("__")[0] + "__{}".format(int(name.split("__")[-1]) * 2 + i)
             else: split_node.name = name + "__{}".format(i)
-            split_node.weight_t_size[1] //= 2
+            split_node.weight_t_size[3] //= 2
             split_node.calculatePerf(hw_cfg)
             graph.nodes.append(split_node)
 
