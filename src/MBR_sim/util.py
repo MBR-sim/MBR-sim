@@ -1,5 +1,7 @@
 #IMPORTS
 import math 
+import MBR_sim.simulate as simulate
+import MBR_sim.util as util
 # Node and Graph Class
 
 linearTypes = ["Convolution"]
@@ -33,11 +35,26 @@ class Node ():
         self.input_deps = None
         self.output_deps = None
 
-    def calculateVolumes(self):
-        self.input_t_size += (math.prod(self.input_t_size),)
-        self.output_t_size += (math.prod(self.output_t_size),)
+    def calculatePerf(self, hw_cfg):
+        #Calculates Volumes
+        self.input_t_size = self.input_t_size[:3] + [math.prod(self.input_t_size[:3])]
+        self.output_t_size = self.output_t_size[:3] + [math.prod(self.output_t_size[:3])]
         if self.weight_t_size is not None:
-            self.weight_t_size += (math.prod(self.weight_t_size),)
+            self.weight_t_size = self.weight_t_size[:4] + [math.prod(self.weight_t_size[:4])]
+
+        self.load_cycles = self.input_t_size[3]//int(hw_cfg['TILE']['NOC_BW'])
+        self.store_cycles = self.output_t_size[3]//int(hw_cfg['TILE']['NOC_BW'])
+        if any([linType in self.op_type for linType in util.linearTypes]):
+            self.linear_cycles = (self.MACS//int(hw_cfg['TILE']['MAC_BW']))//simulate.mac_util(self)
+        else:
+            self.linear_cycles = 0
+        self.layer_cycles = max(self.load_cycles, self.simd_cycles, self.linear_cycles, self.store_cycles)
+        self.tiles = 1
+        self.stage_cycles = self.layer_cycles//self.tiles
+
+
+
+        
 
     # Method
     def print_node(self):

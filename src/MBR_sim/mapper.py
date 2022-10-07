@@ -3,8 +3,6 @@
 # improves the overall utilization
 
 #IMPORTS
-from cmath import nan
-from doctest import OutputChecker
 import pandas as pd
 from MBR_sim.util import *
 import MBR_sim.fusion as fusion
@@ -25,12 +23,12 @@ class Mapper:
         for index, row in df.iterrows():
             node = Node(row['LyrName'])
             node.op_type = row['Type']
-            node.output_t_size = (row['OutT(W)'], row['OutT(H)'], row['OutT(D)'])
-            node.input_t_size = (row['InT(W)'], row['InT(H)'], row['InT(D)'])
+            node.output_t_size = [row['OutT(W)'], row['OutT(H)'], row['OutT(D)']]
+            node.input_t_size = [row['InT(W)'], row['InT(H)'], row['InT(D)']]
             if (not row.isnull().any()):
-                node.weight_t_size = (int(row['WgtT(W)']), int(row['WgtT(H)']), int(row['WgtT(D)']), int(row['WgtT(Num)']))
+                node.weight_t_size = [int(row['WgtT(W)']), int(row['WgtT(H)']), int(row['WgtT(D)']), int(row['WgtT(Num)'])]
             node.tile = i
-            node.calculateVolumes()
+            node.calculatePerf(self.hw_cfg)
             self.graph.add_node(node)
             i += 1
         return self.graph
@@ -38,7 +36,12 @@ class Mapper:
     def fuse_nodes(self):
         fusion.fuse_simd(self.graph, self.hw_cfg)
         fusion.inline_linear_simd(self.graph)
-        fusion.fuse_multiple_layers(self.graph, self.hw_cfg)
+        ''' IF WEIGHT ENABLED:
+        Walk through each layer, if each layers weight is greater, split it so that weight threshold is below capacity
+        
+        '''
+        fusion.spread_layers(self.graph, self.hw_cfg)
+        # fusion.fuse_multiple_layers(self.graph, self.hw_cfg)
         return self.graph
 
 

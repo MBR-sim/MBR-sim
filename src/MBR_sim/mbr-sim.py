@@ -8,23 +8,17 @@ import sys
 import visual
 import argparse
 
-
-# All the command line options
- 
-
-
 def main(args):
    #Assign unique Conv ID.
    hw_cfg = configparser.ConfigParser()
    hw_cfg.read(args.config)
 
-   #Update this to Argument Parser
    csv_file = args.csv
    if (args.macbw is not None): hw_cfg['TILE']['MAC_BW'] = str(args.macbw)
    if (args.nocbw is not None): hw_cfg['TILE']['NOC_BW'] = str(args.nocbw)
    if (args.simdbw is not None): hw_cfg['TILE']['SIMD_BW'] = str(args.simdbw)
    if (args.numtiles is not None): hw_cfg['SYSTEM']['TILES'] = str(args.numtiles)   
-   #INITS
+
    map = mapper.Mapper(hw_cfg)
 
    graph = map.generate_nodes(csv_file)
@@ -32,24 +26,19 @@ def main(args):
    simulate.calculateSIMDCycles(graph, hw_cfg)
    simulate.calculateMACS(graph, hw_cfg)
 
+   for node in graph.nodes:
+      node.calculatePerf(hw_cfg)
+
    graph = map.fuse_nodes()
 
-   #Knob for Pipeline Parrallelism
    for node in graph.nodes:
-      node.load_cycles = node.input_t_size[3]//int(hw_cfg['TILE']['NOC_BW'])
-      node.store_cycles = node.output_t_size[3]//int(hw_cfg['TILE']['NOC_BW'])
-      if any([linType in node.op_type for linType in util.linearTypes]):
-         node.linear_cycles = (node.MACS//int(hw_cfg['TILE']['MAC_BW']))//simulate.mac_util(node)
-      else:
-         node.linear_cycles = 0
-      node.layer_cycles = max(node.load_cycles, node.simd_cycles, node.linear_cycles, node.store_cycles)
-      node.tiles = 1
-      node.stage_cycles = node.layer_cycles//node.tiles
+      node.calculatePerf(hw_cfg)
 
    #Knob for Tensor Parrallelism
    # Take layer cycles  = orig layer cycles/tiles
    # Sum all layer cycles
    graph.print_nodes()
+
 
    #Finding Totals
    tot_MACS = 0
@@ -58,8 +47,6 @@ def main(args):
    tot_lyr_cycles = 0
    tot_stage_cycles = 0
    max_stage_cycles = 0
-
-
    for node in graph.nodes:
       tot_MACS += node.MACS
       tot_lin_cycles += node.linear_cycles

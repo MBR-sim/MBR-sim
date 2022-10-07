@@ -1,7 +1,7 @@
 #IMPORTS
 import MBR_sim.util as util
 
-
+#Fuses Back to Back SIMD
 def fuse_simd(graph, hw_cfg):
     fused_nodes = []
 
@@ -30,6 +30,7 @@ def fuse_simd(graph, hw_cfg):
     graph.nodes = fused_nodes
     return graph
 
+#Inlines each MatMul and SIMD layer into a node
 def inline_linear_simd(graph):
     fused_nodes = []
     i = 0
@@ -59,25 +60,45 @@ def inline_linear_simd(graph):
     graph.nodes = fused_nodes
     return graph
 
+def split_layers_weights(graph, hw_cfg):
+    while len(graph.nodes) < int(hw_cfg['SYSTEM']['TILES']):
+        graph.nodes.sort(key = lambda node: node.layer_cycles)
+        largest_node = graph.nodes.pop(0)
+        print(largest_node.layer_cycles)
+        name = largest_node.name
+        print(name)
 
-def split_layers(graph, hw_cfg):
-    if (len(graph.nodes) < int(hw_cfg['SYSTEM']['TILES'])):
-        while len(graph.nodes) != int(hw_cfg['SYSTEM']['TILES']):
-            graph.nodes.sort(key = lambda node: node.stage_cycles)
-            largest_node = graph.nodes[0]
-            largest_node_0 = largest_node.copy()
-            largest_node_1 = largest_node.copy()
-            largest_node_0.name = largest_node_0.name.split("_")[0] + "_".join(largest_node_0.name.split("_")[1:]) + "_0"
-            largest_node_1.name = largest_node_1.name.split("_")[0] + "_".join(largest_node_1.name.split("_")[1:]) + "_1"
-            
-            largest_node_0.stage_cycles //= 2
+        for i in range(0,2):
+            split_node = largest_node.copy()
+            split_node.name = name.split("_")[:-1] + "_" + str(int(name.split("_")[-1]) * 2 + i)
+            split_node.weight_t_size[3] //= 2
+            split_node.calculatePerf(hw_cfg)
+            graph.nodes.append(split_node)
 
 '''
 1. Look at smallest layer, look at before and after. 
     ex: 50 is smallest, fuse with 49 or 51?
     Recursive
+
+Iterate through each node, starting with smalllest
 '''
-def fuse_multiple_layers(graph, hw_cfg):
+def spread_layers(graph, hw_cfg):
+    while len(graph.nodes) < int(hw_cfg['SYSTEM']['TILES']):
+        graph.nodes.sort(key = lambda node: node.layer_cycles)
+        largest_node = graph.nodes.pop(0)
+        print(largest_node.layer_cycles)
+        name = largest_node.name
+        print(name)
+
+        for i in range(0,2):
+            split_node = largest_node.copy()
+            if (split_node.name[-3:-1] == "__"): split_node.name = name.split("__")[0] + "__{}".format(int(name.split("__")[-1]) * 2 + i)
+            else: split_node.name = name + "__{}".format(i)
+            split_node.weight_t_size[1] //= 2
+            split_node.calculatePerf(hw_cfg)
+            graph.nodes.append(split_node)
+
+def combimne_multiple_layers(graph, hw_cfg):
     while (len(graph.nodes) > int(hw_cfg['SYSTEM']['TILES'])):
         graph.nodes.sort(key=lambda node: node.stage_cycles)
         smallest_node_0 = graph.nodes.pop(-1)            

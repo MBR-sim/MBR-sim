@@ -35,13 +35,10 @@ def resource_table(hw_cfg, graph):
         cellText = np.vstack([cellText, row])
         cellCycles.append(cycles)
     cellText = np.delete(cellText, 0, axis=0)
-    print(maxWidth)
-    print(maxLines)
 
     cellWidth = 1.25 * maxWidth
     cellHeight = 4 * maxLines
     sns.set(rc = {'figure.figsize':(cellWidth,cellHeight)})
-    print(cellText)
     ax = sns.heatmap(cellCycles, annot=cellText, fmt="s", cbar = True,  linewidths=.5)
     plt.savefig("resource_heatmap.svg")
 

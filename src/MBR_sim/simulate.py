@@ -26,6 +26,7 @@ def mac_util(node):
     #
     wgtWidth = node.weight_t_size[0]
     wgtHeight = node.weight_t_size[1]
+    node.print_node(    )
     if (wgtHeight == wgtWidth):
         if (wgtHeight == 1): return 0.9
         if (wgtHeight == 3): return 1
