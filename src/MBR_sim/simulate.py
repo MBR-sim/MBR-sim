@@ -19,14 +19,13 @@ def calculateMACS(graph, hw_cfg):
         if (node.op_type in util.linearTypes):
             #For Convolution Layers, Total MAC is Weight Volume * Output Volume
             #For MatMul Layers, Total MAC is Ouput Volume * Weight Width
-            node.MACS = int(node.output_t_size[3] * node.weight_t_size[4]/node.weight_t_size[3])
+            node.MACS = int(math.prod(node.output_t_size[:1]) * node.weight_t_size[4])
 
 def mac_util(node):
     #For different convolutions, should be in Config File.
     #
     wgtWidth = node.weight_t_size[0]
     wgtHeight = node.weight_t_size[1]
-    node.print_node(    )
     if (wgtHeight == wgtWidth):
         if (wgtHeight == 1): return 0.9
         if (wgtHeight == 3): return 1

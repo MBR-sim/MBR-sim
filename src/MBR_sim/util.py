@@ -8,11 +8,13 @@ linearTypes = ["Convolution"]
 
 class Node ():
     uidCounter = 0
+    convID = 0
 
     def __init__(self, name):
         self.name = name
         self.uid = Node.uidCounter
         Node.uidCounter += 1
+        self.convID = None
         self.op_type = None
         self.data_type = None
         self.tiles = None
@@ -52,13 +54,16 @@ class Node ():
         self.tiles = 1
         self.stage_cycles = self.layer_cycles//self.tiles
 
+    def __repr__(self):
+        return "{}; {}".format(self.name, self.convID)
+
 
 
         
 
     # Method
     def print_node(self):
-        print("Name: {}, UID: {}".format(self.name, self.uid))
+        print("Name: {}, UID: {}, CONVID: {}".format(self.name, self.uid, self.convID))
         print("Input Tensor:" + str(self.input_t_size))
         print("Ouput Tensor: " + str(self.output_t_size))
         print("Weight Tensor:" + str(self.weight_t_size))
@@ -69,6 +74,7 @@ class Node ():
     
     def copy(self):
         newNode = Node(self.name)
+        newNode.convID = self.convID
         newNode.op_type = self.op_type
         newNode.data_type = self.data_type
         newNode.tiles = self.tiles
@@ -136,6 +142,13 @@ def factint(n):
             break
     return candidate, n //candidate
 
+
+#Helper function for mapper.split_by_weight
+def split(a, n):
+    k, m = divmod(a, n)
+    vals = [k + 1 for i in range(m)]
+    vals.extend([k for i in range(n-m)])
+    return vals
 
 
 

@@ -6,6 +6,7 @@
 import pandas as pd
 from MBR_sim.util import *
 import MBR_sim.fusion as fusion
+import math
 
 class Mapper:
     def __init__(self, hw_cfg) -> None:
@@ -21,21 +22,42 @@ class Mapper:
         self.graph = Graph("graph")
         i = 1
         for index, row in df.iterrows():
+            maxWgtCapacity = 0
+            if row['Type'] in linearTypes and self.hw_cfg['SYSTEM']['MAX_WEIGHT'] == "1":
+                maxWgtCapacity = int(self.hw_cfg['SYSTEM']['MAX_WEIGHT_CAPACITY'])
             node = Node(row['LyrName'])
             node.op_type = row['Type']
+            if node.op_type in linearTypes:
+                node.convID = Node.convID
+                Node.convID += 1
             node.output_t_size = [row['OutT(W)'], row['OutT(H)'], row['OutT(D)']]
             node.input_t_size = [row['InT(W)'], row['InT(H)'], row['InT(D)']]
             if (not row.isnull().any()):
                 node.weight_t_size = [int(row['WgtT(W)']), int(row['WgtT(H)']), int(row['WgtT(D)']), int(row['WgtT(Num)'])]
             node.tile = i
             node.calculatePerf(self.hw_cfg)
-            self.graph.add_node(node)
+            splitNodes = [node]
+            if maxWgtCapacity != 0:
+                splitNodes = self.split_by_weight(node)
+            [self.graph.add_node(node) for node in splitNodes]
             i += 1
         return self.graph
     
+    def split_by_weight(self, node):
+        maxWeight = int(self.hw_cfg['SYSTEM']['MAX_WEIGHT_CAPACITY'])
+        slots = math.ceil(node.weight_t_size[-1]/maxWeight)
+        totalWeightNum = node.weight_t_size[-2]
+        split = []
+        for i in range(0, slots):
+            splitNode = node.copy()
+            splitNode.weight_t_size[-2] = util.split(totalWeightNum, slots)[i]
+            splitNode.calculatePerf(self.hw_cfg)
+            split.append(splitNode)
+        return split
+
     def fuse_nodes(self):
         fusion.fuse_simd(self.graph, self.hw_cfg)
-        fusion.inline_linear_simd(self.graph)
+        fusion.inline_linear_simd(self.graph, self.hw_cfg)
         ''' IF WEIGHT ENABLED:
         Walk through each layer, if each layers weight is greater, split it so that weight threshold is below capacity
         

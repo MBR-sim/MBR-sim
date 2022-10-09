@@ -2,10 +2,10 @@
 #IMPORTS
 import configparser
 import MBR_sim.mapper as mapper
-import simulate
+import MBR_sim.simulate as simulate
 import MBR_sim.util as util
 import sys
-import visual
+import MBR_sim.visual as visual
 import argparse
 
 def main(args):
@@ -22,17 +22,17 @@ def main(args):
    map = mapper.Mapper(hw_cfg)
 
    graph = map.generate_nodes(csv_file)
-   graph.print_nodes()
+   # graph.print_nodes()
    
    simulate.calculateSIMDCycles(graph, hw_cfg)
    simulate.calculateMACS(graph, hw_cfg)
-   graph.print_nodes()
+   # graph.print_nodes()
 
    for node in graph.nodes:
       node.calculatePerf(hw_cfg)
 
    graph = map.fuse_nodes()
-   graph.print_nodes()
+   # graph.print_nodes()
 
    for node in graph.nodes:
       node.calculatePerf(hw_cfg)
@@ -40,7 +40,7 @@ def main(args):
    #Knob for Tensor Parrallelism
    # Take layer cycles  = orig layer cycles/tiles
    # Sum all layer cycles
-   graph.print_nodes()
+   # graph.print_nodes()
 
 
    #Finding Totals

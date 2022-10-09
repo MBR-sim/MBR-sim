@@ -1,6 +1,6 @@
 #IMPORTS
 from tkinter import font
-import util
+import MBR_sim.util as util
 import matplotlib.pyplot as plt 
 import numpy as np; np.random.seed(0)
 import seaborn as sns
@@ -15,6 +15,9 @@ def resource_table(hw_cfg, graph):
     cellCycles = []
     maxLines = 0
     maxWidth = 0
+    # graph.print_nodes()
+    # print(util.Node.convID)
+    graph.nodes.sort(key = lambda node: node.convID)
     for r in range(0, rows):
         row = []
         cycles = []
@@ -22,13 +25,15 @@ def resource_table(hw_cfg, graph):
             tile = r * cols + c + 1
             if (tile <= len(graph.nodes)):
                 node = graph.nodes[tile - 1]
-                cycles.append(node.layer_cycles)
-                string = str(tile) + "\nCycles: {}".format(int(cycles[-1])) + "\n\n" + node.name.replace(";", "\n")
+                string = str(tile) + "\nCycles: {}".format(int(node.layer_cycles)) + "\n\n" + node.name.replace(";", "\n").replace("__", "\n") + "\n CONV ID: {}".format(node.convID)
                 maxWidth = max(maxWidth, len(max(string.split("\n"), key= lambda s: len(s))))
                 maxLines = max(maxLines, len(string.split("\n")))
                 if r % 2 == 1:
                     row.insert(0, string)
-                else: row.append(string)
+                    cycles.insert(0, node.layer_cycles)
+                else: 
+                    row.append(string)
+                    cycles.append(node.layer_cycles)
             else:
                 row.append("")
                 cycles.append(0)

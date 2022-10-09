@@ -15,14 +15,16 @@ def fuse_simd(graph, hw_cfg):
         elif (secondNode.op_type in util.linearTypes):
             fused_nodes.append(graph.nodes.pop(0))
         else:
-            fusedNode = util.Node(firstNode.name + "+" + secondNode.name)
+            fusedNode = firstNode.copy()
+            fusedNode.name = firstNode.name + "+" + secondNode.name
             fusedNode.op_type = "{}+{}".format(firstNode.op_type,secondNode.op_type)
             fusedNode.simd_cycles = firstNode.simd_cycles + secondNode.simd_cycles
 
             fusedNode.output_t_size = secondNode.output_t_size
             fusedNode.input_t_size = firstNode.input_t_size
             fusedNode.weight_t_size = firstNode.weight_t_size
-            
+            fusedNode.calculatePerf(hw_cfg)
+
             graph.nodes.pop(0)
             graph.nodes.pop(0)
             graph.nodes.insert(0, fusedNode)
@@ -31,7 +33,7 @@ def fuse_simd(graph, hw_cfg):
     return graph
 
 #Inlines each MatMul and SIMD layer into a node
-def inline_linear_simd(graph):
+def inline_linear_simd(graph, hw_cfg):
     fused_nodes = []
     i = 0
     while len(graph.nodes) > 1:
@@ -43,7 +45,8 @@ def inline_linear_simd(graph):
         elif (secondNode.op_type in util.linearTypes):
             fused_nodes.append(graph.nodes.pop(0))
         else:
-            fusedNode = util.Node(firstNode.name + ";" + secondNode.name)
+            fusedNode = firstNode.copy()
+            fusedNode.name = firstNode.name + ";" + secondNode.name
             fusedNode.op_type = "{};{}".format(firstNode.op_type,secondNode.op_type)
             fusedNode.simd_cycles = secondNode.simd_cycles
             fusedNode.MACS = firstNode.MACS
@@ -51,6 +54,7 @@ def inline_linear_simd(graph):
             fusedNode.output_t_size = secondNode.output_t_size
             fusedNode.input_t_size = firstNode.input_t_size
             fusedNode.weight_t_size = firstNode.weight_t_size
+            fusedNode.calculatePerf(hw_cfg)
 
             graph.nodes.pop(0)
             graph.nodes.pop(0)
@@ -83,19 +87,23 @@ def split_layers_weights(graph, hw_cfg):
 Iterate through each node, starting with smalllest
 '''
 def spread_layers(graph, hw_cfg):
+    print("HERE")
     while len(graph.nodes) < int(hw_cfg['SYSTEM']['TILES']):
-        graph.nodes.sort(key = lambda node: node.layer_cycles)
+        graph.nodes.sort(key = lambda node: node.layer_cycles, reverse=True)
         largest_node = graph.nodes.pop(0)
-        print(largest_node.layer_cycles)
         name = largest_node.name
-        print(name)
 
         for i in range(0,2):
             split_node = largest_node.copy()
-            if (split_node.name[-3:-1] == "__"): split_node.name = name.split("__")[0] + "__{}".format(int(name.split("__")[-1]) * 2 + i)
+            if (split_node.name[-3:-1] == "__"): split_node.name = name + str(i)
             else: split_node.name = name + "__{}".format(i)
             split_node.weight_t_size[3] //= 2
+            split_node.MACS //= 2
+            split_node.simd_cycles //= 2
             split_node.calculatePerf(hw_cfg)
+            print(largest_node.layer_cycles)
+            print(split_node.layer_cycles)
+            print()
             graph.nodes.append(split_node)
 
 def combimne_multiple_layers(graph, hw_cfg):
