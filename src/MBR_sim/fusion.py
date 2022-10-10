@@ -64,28 +64,6 @@ def inline_linear_simd(graph, hw_cfg):
     graph.nodes = fused_nodes
     return graph
 
-def split_layers_weights(graph, hw_cfg):
-    while len(graph.nodes) < int(hw_cfg['SYSTEM']['TILES']):
-        graph.nodes.sort(key = lambda node: node.layer_cycles)
-        largest_node = graph.nodes.pop(0)
-        print(largest_node.layer_cycles)
-        name = largest_node.name
-        print(name)
-
-        for i in range(0,2):
-            split_node = largest_node.copy()
-            split_node.name = name.split("_")[:-1] + "_" + str(int(name.split("_")[-1]) * 2 + i)
-            split_node.weight_t_size[3] //= 2
-            split_node.calculatePerf(hw_cfg)
-            graph.nodes.append(split_node)
-
-'''
-1. Look at smallest layer, look at before and after. 
-    ex: 50 is smallest, fuse with 49 or 51?
-    Recursive
-
-Iterate through each node, starting with smalllest
-'''
 def spread_layers(graph, hw_cfg):
     print("HERE")
     while len(graph.nodes) < int(hw_cfg['SYSTEM']['TILES']):
@@ -97,7 +75,7 @@ def spread_layers(graph, hw_cfg):
             split_node = largest_node.copy()
             if (split_node.name[-3:-1] == "__"): split_node.name = name + str(i)
             else: split_node.name = name + "__{}".format(i)
-            split_node.weight_t_size[3] //= 2
+            split_node.weight_t_size[3] //= 2 #Divde Input and Output tensors
             split_node.MACS //= 2
             split_node.simd_cycles //= 2
             split_node.calculatePerf(hw_cfg)
@@ -106,6 +84,7 @@ def spread_layers(graph, hw_cfg):
             print()
             graph.nodes.append(split_node)
 
+#TODO: Fix
 def combimne_multiple_layers(graph, hw_cfg):
     while (len(graph.nodes) > int(hw_cfg['SYSTEM']['TILES'])):
         graph.nodes.sort(key=lambda node: node.stage_cycles)

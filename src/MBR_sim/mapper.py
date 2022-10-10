@@ -23,13 +23,18 @@ class Mapper:
         i = 1
         for index, row in df.iterrows():
             maxWgtCapacity = 0
-            if row['Type'] in linearTypes and self.hw_cfg['SYSTEM']['MAX_WEIGHT'] == "1":
+            if row['Type'] in linearTypes and self.hw_cfg['SYSTEM']['ENABLE_WEIGHT_SPLITTING'] == "1":
                 maxWgtCapacity = int(self.hw_cfg['SYSTEM']['MAX_WEIGHT_CAPACITY'])
             node = Node(row['LyrName'])
             node.op_type = row['Type']
             if node.op_type in linearTypes:
                 node.convID = Node.convID
                 Node.convID += 1
+            if self.hw_cfg['DATATYPE']['USE_WORKLOAD'] == "1":
+                node.inDatatype = row['InDatatype']
+                node.outDatatype = row['OutDatatype']
+                node.wgtDatatype = row['WgtDatatype']
+
             node.output_t_size = [row['OutT(W)'], row['OutT(H)'], row['OutT(D)']]
             node.input_t_size = [row['InT(W)'], row['InT(H)'], row['InT(D)']]
             if (not row.isnull().any()):
@@ -58,10 +63,6 @@ class Mapper:
     def fuse_nodes(self):
         fusion.fuse_simd(self.graph, self.hw_cfg)
         fusion.inline_linear_simd(self.graph, self.hw_cfg)
-        ''' IF WEIGHT ENABLED:
-        Walk through each layer, if each layers weight is greater, split it so that weight threshold is below capacity
-        
-        '''
         fusion.spread_layers(self.graph, self.hw_cfg)
         # fusion.fuse_multiple_layers(self.graph, self.hw_cfg)
         return self.graph

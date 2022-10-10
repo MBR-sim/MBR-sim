@@ -22,6 +22,10 @@ def main(args):
    map = mapper.Mapper(hw_cfg)
 
    graph = map.generate_nodes(csv_file)
+   if hw_cfg['DATATYPE']['USE_GLOBAL'] == "1":
+      graph.globalInDatatype = args.input_datatype
+      graph.globalOutDatatype = args.output_datatype
+      graph.globalWgtDatatype = args.weight_datatype
    # graph.print_nodes()
    
    simulate.calculateSIMDCycles(graph, hw_cfg)
@@ -60,10 +64,16 @@ def main(args):
 
    print("Total MACS: {:.2e}".format(tot_MACS))
    print("Mac Cycles: {:.2e}".format(tot_lin_cycles))
-   print("Mac Util: {:.0%}".format((tot_MACS//int(hw_cfg['TILE']['MAC_BW']))/(max_stage_cycles * tot_tiles)))
-   print("Total Cycles: {:.2e}".format(tot_lyr_cycles))
-   print("Total Stage Cycles: {:.2e}".format(tot_stage_cycles))
-   print("IPS/Chip: {}".format((int(hw_cfg['SYSTEM']['FREQ'])//tot_stage_cycles)) * (int(hw_cfg['SYSTEM']['TILES'])//tot_tiles))
+   print("Mac Util: {:.0%}".format((tot_MACS//int(hw_cfg['TILE']['MAC_BW']))/(max_stage_cycles * tot_tiles))) #Difference Between Tensor and Parallelism
+   if args.parallelism == "tensor":
+      print("Total Cycles: {:.2e}".format(tot_lyr_cycles))
+      print("Total Stage Cycles: {:.2e}".format(tot_stage_cycles))
+      print("IPS/Chip: {}".format((int(hw_cfg['SYSTEM']['FREQ'])//tot_stage_cycles)) * (int(hw_cfg['SYSTEM']['TILES'])//tot_tiles))
+      #TODO: Add Latency
+   elif args.parallelism == "pipeline":
+      print("Total Cycles: {:.2e}".format(tot_lyr_cycles))
+      print("Total Cycle Length: {:.2e}".format(tot_lyr_cycles//tot_tiles))
+      print("IPS/Chip: {}".format((int(hw_cfg['SYSTEM']['FREQ'])//tot_stage_cycles)) * (int(hw_cfg['SYSTEM']['TILES'])//tot_tiles))
 
    visual.resource_table(hw_cfg, graph)
 
@@ -76,5 +86,8 @@ if __name__ == "__main__":
    parser.add_argument("-b", "--nocbw", help = "the noc bandwidth of the hardware, if not entered, uses hw_cfg", type=int)
    parser.add_argument("-s", "--simdbw", help = "the simd bandwidth of the hardware, if not entered, uses hw_cfg", type=int)
    parser.add_argument("-n", "--numtiles", help = "the number of tiles in the hardware, if not entered, uses hw_cfg", type=int)
+   parser.add_argument("-i", "--input_datatype", help = "the global input datatype for workload", type=str)
+   parser.add_argument("-o", "--output_datatype", help = "the global output datatype for workload", type=str)
+   parser.add_argument("-w", "--weight_datatype", help = "the global weight datatype for workload", type=str)
    args = parser.parse_args()
    main(args)
