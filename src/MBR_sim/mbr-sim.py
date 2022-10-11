@@ -41,11 +41,7 @@ def main(args):
    for node in graph.nodes:
       node.calculatePerf(hw_cfg)
 
-   #Knob for Tensor Parrallelism
-   # Take layer cycles  = orig layer cycles/tiles
-   # Sum all layer cycles
-   # graph.print_nodes()
-
+   graph.nodes.sort(key=lambda node: node.convID)
 
    #Finding Totals
    tot_MACS = 0

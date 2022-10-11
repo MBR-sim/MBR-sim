@@ -19,14 +19,8 @@ def calculateMACS(graph, hw_cfg):
         if (node.op_type in util.linearTypes):
             #For Convolution Layers, Total MAC is Weight Volume * Output Volume
             #For MatMul Layers, Total MAC is Ouput Volume * Weight Width
-            macs = int(math.prod(node.output_t_size[:1]) * node.weight_t_size[4])
-            if hw_cfg['DATATYPE']['USE_GLOBAL'] == "1":
-                node.MACS = macs * float(hw_cfg['DATATYPE'][graph.globalInDatatype.upper()]) * float(hw_cfg['DATATYPE'][graph.globalOutDatatype.upper()]) *  float(hw_cfg['DATATYPE'][graph.globalWgtDatatype.upper()]) #TODO: Don't Update MACS, update MAC_BW
-            elif hw_cfg['DATATYPE']['USE_WORKLOAD'] == "1":
-                node.MACS = macs * float(hw_cfg['DATATYPE'][node.inDatatype.upper()]) * float(hw_cfg['DATATYPE'][node.outDatatype.upper()]) * float(hw_cfg['DATATYPE'][node.wgtDatatype.upper()])
-            else:
-                node.MACS = macs
-                print("WARNING: SPECIFY DATATYPE SELECTION; DEFAULTING TO INT8")
+            node.MACS = int(math.prod(node.output_t_size[:2]) * node.weight_t_size[4])
+
 
 def mac_util(node, hw_cfg):
     #TODO: For different convolutions, should be in Config File.
