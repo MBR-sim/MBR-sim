@@ -12,7 +12,7 @@ class Mapper:
     def __init__(self, hw_cfg) -> None:
         self.hw_cfg = hw_cfg
         pass
-    def generate_nodes(self, csv_file):
+    def generate_nodes(self, csv_file, args):
         df = pd.read_csv(csv_file)
 
         #Format Data
@@ -30,10 +30,21 @@ class Mapper:
             if node.op_type in linearTypes:
                 node.convID = Node.convID
                 Node.convID += 1
-            if self.hw_cfg['DATATYPE']['USE_WORKLOAD'] == "1":
+
+            #Setting Datatype of each node
+            if self.hw_cfg['DATATYPE']['USE_GLOBAL'] == "1":
+                node.globalInDatatype = args.input_datatype
+                node.globalOutDatatype = args.output_datatype
+                node.globalWgtDatatype = args.weight_datatype
+            elif self.hw_cfg['DATATYPE']['USE_WORKLOAD'] == "1":
                 node.inDatatype = row['InDatatype']
                 node.outDatatype = row['OutDatatype']
                 node.wgtDatatype = row['WgtDatatype']
+            else:
+                node.inDatatype = 'int8'
+                node.outDatatype = 'int8'
+                node.wgtDatatype = 'int8'
+
 
             node.output_t_size = [row['OutT(W)'], row['OutT(H)'], row['OutT(D)']]
             node.input_t_size = [row['InT(W)'], row['InT(H)'], row['InT(D)']]

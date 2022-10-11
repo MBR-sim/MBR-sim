@@ -51,7 +51,7 @@ class Node ():
         self.load_cycles = self.input_t_size[3]//int(hw_cfg['TILE']['NOC_BW'])
         self.store_cycles = self.output_t_size[3]//int(hw_cfg['TILE']['NOC_BW'])
         if any([linType in self.op_type for linType in util.linearTypes]):
-            self.linear_cycles = (self.MACS//int(hw_cfg['TILE']['MAC_BW']))//simulate.mac_util(self, hw_cfg) #TODO: Update, Effective MAC Bandwidth (inc. Datatype)
+            self.linear_cycles = (self.MACS//int(hw_cfg['TILE']['MAC_BW']))//simulate.mac_util(self, hw_cfg)
         else:
             self.linear_cycles = 0
         self.layer_cycles = max(self.load_cycles, self.simd_cycles, self.linear_cycles, self.store_cycles)
@@ -60,10 +60,6 @@ class Node ():
 
     def __repr__(self):
         return "{}; {}".format(self.name, self.convID)
-
-
-
-        
 
     # Method
     def print_node(self):
@@ -105,7 +101,6 @@ class Node ():
         newNode.input_deps = self.input_deps
         newNode.output_deps = self.output_deps
         return newNode
-
 
 class Graph():
     def __init__(self, name):

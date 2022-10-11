@@ -17,21 +17,28 @@ def calculateSIMDCycles(graph, hw_cfg):
 def calculateMACS(graph, hw_cfg):
     for node in graph.nodes:
         if (node.op_type in util.linearTypes):
-            #For Convolution Layers, Total MAC is Weight Volume * Output Volume
-            #For MatMul Layers, Total MAC is Ouput Volume * Weight Width
+            #TODO: support MatMul, not just convolution 
             node.MACS = int(math.prod(node.output_t_size[:2]) * node.weight_t_size[4])
 
 
 def mac_util(node, hw_cfg):
-    #TODO: For different convolutions, should be in Config File.
+    macUtil = 1
 
+    #Calculate MacUtil
     wgtWidth = node.weight_t_size[0]
     wgtHeight = node.weight_t_size[1]
     if (wgtHeight == wgtWidth):
-        if (wgtHeight == 1): return float(hw_cfg['MAC_UTIL']['KER_1'])
-        elif (wgtHeight == 3): return float(hw_cfg['MAC_UTIL']['KER_3'])
-        elif (wgtHeight == 5): return float(hw_cfg['MAC_UTIL']['KER_5'])
-        elif (wgtHeight == 7): return float(hw_cfg['MAC_UTIL']['KER_7'])
-    raise Exception("MAC NOT SUPPORTED: {} x {}".format(wgtWidth, wgtHeight)) #Don't Break, print warning and add defaults
+        if (wgtHeight == 1): macUtil = float(hw_cfg['MAC_UTIL']['KER_1'])
+        elif (wgtHeight == 3): macUtil = float(hw_cfg['MAC_UTIL']['KER_3'])
+        elif (wgtHeight == 5): macUtil = float(hw_cfg['MAC_UTIL']['KER_5'])
+        elif (wgtHeight == 7): macUtil = float(hw_cfg['MAC_UTIL']['KER_7'])
+    else:
+        print("WEIGHT NOT SUPPORTED: {} x {}".format(wgtWidth, wgtHeight))
+        macUtil = float(hw_cfg['MAC_UTIL']['DEFAULT'])
+
+    #Calculate Effective MacUtil (Using Datatype)
+    macUtil *= float(hw_cfg['DATATYPE'][node.inDatatype.upper()]) * float(hw_cfg['DATATYPE'][node.outDatatype.upper()]) * float(hw_cfg['DATATYPE'][node.wgtDatatype.upper()])
+    
+    return macUtil
 
 

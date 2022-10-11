@@ -21,11 +21,7 @@ def main(args):
 
    map = mapper.Mapper(hw_cfg)
 
-   graph = map.generate_nodes(csv_file)
-   if hw_cfg['DATATYPE']['USE_GLOBAL'] == "1":
-      graph.globalInDatatype = args.input_datatype
-      graph.globalOutDatatype = args.output_datatype
-      graph.globalWgtDatatype = args.weight_datatype
+   graph = map.generate_nodes(csv_file, args)
    # graph.print_nodes()
    
    simulate.calculateSIMDCycles(graph, hw_cfg)
