@@ -1,0 +1,13 @@
+1. Test Enable Weight Splitting in hardware config on Restnet 50
+    a. Without Splitting
+    b. Split by 1 MB
+    c. Split by 2 MB
+
+2. Test Combine/Spread layers
+    a. Run Resnet 50 w/ 64 tiles
+    b. Run Resnet 50 w/ 32 tiles
+
+3. Experiment with Datatypes
+    a. Run with Int4
+    b. Run with Int 8
+    c. Run with Fp 16

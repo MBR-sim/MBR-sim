@@ -34,10 +34,10 @@ def mac_util(node, hw_cfg):
     wgtWidth = node.weight_t_size[0]
     wgtHeight = node.weight_t_size[1]
     if (wgtHeight == wgtWidth):
-        if (wgtHeight == 1): return int(hw_cfg['MAC_UTIL']['KER_1'])
-        if (wgtHeight == 3): return 1
-        if (wgtHeight == 3): return 1
-        if (wgtHeight == 7): return 0.5
+        if (wgtHeight == 1): return float(hw_cfg['MAC_UTIL']['KER_1'])
+        elif (wgtHeight == 3): return float(hw_cfg['MAC_UTIL']['KER_3'])
+        elif (wgtHeight == 5): return float(hw_cfg['MAC_UTIL']['KER_5'])
+        elif (wgtHeight == 7): return float(hw_cfg['MAC_UTIL']['KER_7'])
     raise Exception("MAC NOT SUPPORTED: {} x {}".format(wgtWidth, wgtHeight)) #Don't Break, print warning and add defaults
 
 
