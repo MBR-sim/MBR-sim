@@ -44,28 +44,26 @@ def main(args):
    tot_lin_cycles = 0
    tot_tiles = 0
    tot_lyr_cycles = 0
-   tot_stage_cycles = 0
-   max_stage_cycles = 0
+   max_lyr_cycles = 0
    for node in graph.nodes:
       tot_MACS += node.MACS
       tot_lin_cycles += node.linear_cycles
       tot_tiles += node.tiles
       tot_lyr_cycles += node.layer_cycles
-      tot_stage_cycles += node.stage_cycles
-      max_stage_cycles = max(max_stage_cycles, node.stage_cycles)
+      max_lyr_cycles = max(max_lyr_cycles, node.layer_cycles)
 
    print("Total MACS: {:.2e}".format(tot_MACS))
    print("Mac Cycles: {:.2e}".format(tot_lin_cycles))
-   print("Mac Util: {:.0%}".format((tot_MACS//int(hw_cfg['TILE']['MAC_BW']))/(max_stage_cycles * tot_tiles))) #Difference Between Tensor and Parallelism
+   print("Mac Util: {:.0%}".format((tot_MACS//int(hw_cfg['TILE']['MAC_BW']))/(max_lyr_cycles * tot_tiles))) #Difference Between Tensor and Parallelism
    if args.parallelism == "tensor":
-      print("Total Cycles: {:.2e}".format(tot_lyr_cycles))
-      print("Total Stage Cycles: {:.2e}".format(tot_stage_cycles))
-      print("IPS/Chip: {}".format((int(hw_cfg['SYSTEM']['FREQ'])//tot_stage_cycles)) * (int(hw_cfg['SYSTEM']['TILES'])//tot_tiles))
+      print("Total Cycles: {:.2e}".format(max_lyr_cycles))
+      print("IPS/Chip: {}".format((int(hw_cfg['SYSTEM']['FREQ'])//max_lyr_cycles)))
+      print("Latency: {:.2}ms".format((max_lyr_cycles/int(hw_cfg['SYSTEM']['FREQ'])*1000)))
       #TODO: Add Latency
    elif args.parallelism == "pipeline":
       print("Total Cycles: {:.2e}".format(tot_lyr_cycles))
       print("Total Cycle Length: {:.2e}".format(tot_lyr_cycles//tot_tiles))
-      print("IPS/Chip: {}".format((int(hw_cfg['SYSTEM']['FREQ'])//tot_stage_cycles)) * (int(hw_cfg['SYSTEM']['TILES'])//tot_tiles))
+      print("IPS/Chip: {:.2e}".format((int(hw_cfg['SYSTEM']['FREQ'])//tot_stage_cycles)) * (int(hw_cfg['SYSTEM']['TILES'])//tot_tiles))
 
    visual.resource_table(hw_cfg, graph)
 
@@ -73,7 +71,7 @@ if __name__ == "__main__":
    parser = argparse.ArgumentParser()
    parser.add_argument("-c", "--config", help = "the path to the hardware config file", type=str, default="src/MBR_sim/configs/hw_config1.cfg")
    parser.add_argument("-f", "--csv", help = "the path to the csv file of the workload", type=str, default="src/MBR_sim/workloads/csv/ResNet50.csv")
-   parser.add_argument("-p", "--parallelism", help = "Choose between tensor or pipeline parrallelism", choices=["tensor","pipeline"], type=str, default="pipeline")
+   parser.add_argument("-p", "--parallelism", help = "Choose between tensor or pipeline parrallelism", choices=["tensor","pipeline"], type=str, default="tensor")
    parser.add_argument("-m", "--macbw", help = "the mac bandwidth of the hardware, if not entered, uses hw_cfg", type=int)
    parser.add_argument("-b", "--nocbw", help = "the noc bandwidth of the hardware, if not entered, uses hw_cfg", type=int)
    parser.add_argument("-s", "--simdbw", help = "the simd bandwidth of the hardware, if not entered, uses hw_cfg", type=int)
