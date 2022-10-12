@@ -1,11 +1,44 @@
 1. Test Enable Weight Splitting in hardware config on Restnet 50
     a. Without Splitting
+        Total MACS: 4.09e+09
+        Mac Cycles: 8.68e+06
+        Mac Util: 55%
+        Total Cycles: 2.26e+05
+        IPS/Chip: 4428.854875283447
+        Latency: 0.23ms 
+
     b. Split by 1 MB
+        Total MACS: 4.09e+09
+        Mac Cycles: 8.68e+06
+        Mac Util: 54%
+        Total Cycles: 2.30e+05
+        IPS/Chip: 4338.4700819103155
+        Latency: 0.23ms
+    
     c. Split by 2 MB
+        Total MACS: 4.09e+09
+        Mac Cycles: 8.68e+06
+        Mac Util: 55%
+        Total Cycles: 2.26e+05
+        IPS/Chip: 4428.854875283447
+        Latency: 0.23ms
 
 2. Test Combine/Spread layers
     a. Run Resnet 50 w/ 64 tiles
+        Total MACS: 4.09e+09
+        Mac Cycles: 8.68e+06
+        Mac Util: 55%
+        Total Cycles: 2.26e+05
+        IPS/Chip: 4428.854875283447
+        Latency: 0.23ms
+
     b. Run Resnet 50 w/ 32 tiles
+        Total MACS: 4.09e+09
+        Mac Cycles: 8.57e+06
+        Mac Util: 53%
+        Total Cycles: 4.74e+05
+        IPS/Chip: 2110.221066758954
+        Latency: 0.47ms
 
 3. Experiment with Datatypes
     a. Run with Int4
