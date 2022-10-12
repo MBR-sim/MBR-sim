@@ -77,9 +77,5 @@ if __name__ == "__main__":
    parser.add_argument("-i", "--input_datatype", help = "the global input datatype for workload", type=str)
    parser.add_argument("-o", "--output_datatype", help = "the global output datatype for workload", type=str)
    parser.add_argument("-w", "--weight_datatype", help = "the global weight datatype for workload", type=str)
-   parser.add_argument("--comment", help="comment character for csv files", type=str, default="#")
    args = parser.parse_args()
-
-   assert len(args.comment) == 1, "Comment Argument should only be 1 character!"
-
    main(args)

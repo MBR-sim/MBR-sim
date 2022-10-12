@@ -13,7 +13,7 @@ class Mapper:
         self.hw_cfg = hw_cfg
         pass
     def generate_nodes(self, csv_file, args):
-        df = pd.read_csv(csv_file, comment=args.comment)
+        df = pd.read_csv(csv_file)
 
         #Format Data
         df.dropna(subset=['LyrName'], inplace=True)
