@@ -38,7 +38,6 @@ def mac_util(node, hw_cfg):
 
     #Calculate Effective MacUtil (Using Datatype)
     macUtil *= float(hw_cfg['DATATYPE'][node.inDatatype.upper()]) * float(hw_cfg['DATATYPE'][node.outDatatype.upper()]) * float(hw_cfg['DATATYPE'][node.wgtDatatype.upper()])
-    
     return macUtil
 
 

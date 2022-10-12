@@ -28,7 +28,7 @@ class Mapper:
             node = Node(row['LyrName'])
             node.op_type = row['Type']
             if node.op_type in linearTypes:
-                node.convID = Node.convID
+                node.convID = [Node.convID]
                 Node.convID += 1
 
             #Setting Datatype of each node
@@ -75,7 +75,7 @@ class Mapper:
         fusion.fuse_simd(self.graph, self.hw_cfg)
         fusion.inline_linear_simd(self.graph, self.hw_cfg)
         fusion.spread_layers(self.graph, self.hw_cfg)
-        # fusion.fuse_multiple_layers(self.graph, self.hw_cfg)
+        fusion.combine_multiple_layers(self.graph, self.hw_cfg)
         return self.graph
 
 

@@ -48,8 +48,8 @@ def inline_linear_simd(graph, hw_cfg):
             fusedNode = firstNode.copy()
             fusedNode.name = firstNode.name + ";" + secondNode.name
             fusedNode.op_type = "{};{}".format(firstNode.op_type,secondNode.op_type)
-            fusedNode.simd_cycles = secondNode.simd_cycles
-            fusedNode.MACS = firstNode.MACS
+            fusedNode.simd_cycles = firstNode.simd_cycles + secondNode.simd_cycles
+            fusedNode.MACS = firstNode.MACS + secondNode.MACS
 
             fusedNode.output_t_size = secondNode.output_t_size
             fusedNode.input_t_size = firstNode.input_t_size
@@ -84,14 +84,33 @@ def spread_layers(graph, hw_cfg):
             print()
             graph.nodes.append(split_node)
 
-#TODO: Fix
-def combimne_multiple_layers(graph, hw_cfg):
+def combine_multiple_layers(graph, hw_cfg):
     while (len(graph.nodes) > int(hw_cfg['SYSTEM']['TILES'])):
-        graph.nodes.sort(key=lambda node: node.stage_cycles)
-        smallest_node_0 = graph.nodes.pop(-1)            
-        smallest_node_1 = graph.nodes.pop(-2)
-        combined_node = smallest_node_0.copy()
-        combined_node.tile = 1
-        combined_node.output_t_size = smallest_node_1.output_t_size
-        combined_node.stage_cycles = smallest_node_0.stage_cycles + smallest_node_1.stage_cycles
-        graph.nodes.append(combined_node)
+        graph.nodes.sort(key=lambda node: -node.layer_cycles)
+        smallestNode = graph.nodes.pop(-1)
+        print(smallestNode.layer_cycles)
+        #Finding node with convolution ID 1 above and 1 below
+        beforeNode = next((node for node in graph.nodes if (smallestNode.convID[0] - 1) in node.convID), None)
+        afterNode = next((node for node in graph.nodes if (smallestNode.convID[0] + 1) in node.convID), None)
+        print(graph.nodes)
+        if beforeNode is not None and afterNode is not None:
+            pairedNode = beforeNode if beforeNode.layer_cycles < afterNode.layer_cycles else afterNode
+        elif beforeNode is not None and afterNode is None:
+            pairedNode = beforeNode
+        elif beforeNode is None and afterNode is not None:
+            pairedNode = afterNode
+        else:
+            raise Exception("Can not combine only 1 layer!")
+        graph.nodes.remove(pairedNode)
+
+        combinedNode = smallestNode.copy()
+        combinedNode.name += ";" + pairedNode.name
+        combinedNode.op_type = "{};{}".format(smallestNode.op_type,pairedNode.op_type)
+        combinedNode.output_t_size = pairedNode.output_t_size
+        combinedNode.outDatatype = pairedNode.outDatatype
+        combinedNode.simd_cycles += pairedNode.simd_cycles
+        combinedNode.MACS += pairedNode.MACS
+        combinedNode.convID.extend(pairedNode.convID)
+        
+        combinedNode.calculatePerf(hw_cfg)
+        graph.nodes.append(combinedNode)

@@ -14,7 +14,7 @@ class Node ():
         self.name = name
         self.uid = Node.uidCounter
         Node.uidCounter += 1
-        self.convID = None
+        self.convID = []
         self.op_type = None
         self.data_type = None
         self.tiles = None
@@ -42,6 +42,7 @@ class Node ():
         self.output_deps = None
 
     def calculatePerf(self, hw_cfg):
+        self.convID.sort()
         #Calculates Volumes
         self.input_t_size = self.input_t_size[:3] + [math.prod(self.input_t_size[:3])]
         self.output_t_size = self.output_t_size[:3] + [math.prod(self.output_t_size[:3])]
@@ -59,11 +60,11 @@ class Node ():
         self.stage_cycles = self.layer_cycles//self.tiles
 
     def __repr__(self):
-        return "{}; {}".format(self.name, self.convID)
+        return "{}; {}".format(self.name, self.convID[0])
 
     # Method
     def print_node(self):
-        print("Name: {}, UID: {}, CONVID: {}".format(self.name, self.uid, self.convID))
+        print("Name: {}, UID: {}, CONVID: {}".format(self.name, self.uid, self.convID[0]))
         print("Input Tensor:" + str(self.input_t_size))
         print("Ouput Tensor: " + str(self.output_t_size))
         print("Weight Tensor:" + str(self.weight_t_size))

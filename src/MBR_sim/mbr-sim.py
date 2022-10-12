@@ -3,8 +3,6 @@
 import configparser
 import MBR_sim.mapper as mapper
 import MBR_sim.simulate as simulate
-import MBR_sim.util as util
-import sys
 import MBR_sim.visual as visual
 import argparse
 
@@ -37,7 +35,7 @@ def main(args):
    for node in graph.nodes:
       node.calculatePerf(hw_cfg)
 
-   graph.nodes.sort(key=lambda node: node.convID)
+   graph.nodes.sort(key=lambda node: node.convID[0])
 
    #Finding Totals
    tot_MACS = 0
@@ -54,17 +52,17 @@ def main(args):
 
    print("Total MACS: {:.2e}".format(tot_MACS))
    print("Mac Cycles: {:.2e}".format(tot_lin_cycles))
-   print("Mac Util: {:.0%}".format((tot_MACS//int(hw_cfg['TILE']['MAC_BW']))/(max_lyr_cycles * tot_tiles))) #Difference Between Tensor and Parallelism
    if args.parallelism == "tensor":
+      print("Mac Util: {:.0%}".format((tot_MACS/int(hw_cfg['TILE']['MAC_BW']))/(max_lyr_cycles * tot_tiles)))
       print("Total Cycles: {:.2e}".format(max_lyr_cycles))
-      print("IPS/Chip: {}".format((int(hw_cfg['SYSTEM']['FREQ'])//max_lyr_cycles)))
+      print("IPS/Chip: {}".format((int(hw_cfg['SYSTEM']['FREQ'])/max_lyr_cycles)))
       print("Latency: {:.2}ms".format((max_lyr_cycles/int(hw_cfg['SYSTEM']['FREQ'])*1000)))
-      #TODO: Add Latency
    elif args.parallelism == "pipeline":
-      print("Total Cycles: {:.2e}".format(tot_lyr_cycles))
-      print("Total Cycle Length: {:.2e}".format(tot_lyr_cycles//tot_tiles))
-      print("IPS/Chip: {:.2e}".format((int(hw_cfg['SYSTEM']['FREQ'])//tot_stage_cycles)) * (int(hw_cfg['SYSTEM']['TILES'])//tot_tiles))
-
+      print("Mac Util: {:.0%}".format((tot_MACS/int(hw_cfg['TILE']['MAC_BW']))/((tot_lyr_cycles/tot_tiles) * tot_tiles)))
+      print("Total Cycles: {:.2e}".format(tot_lyr_cycles/tot_tiles))
+      print("IPS/Chip: {}".format((int(hw_cfg['SYSTEM']['FREQ'])/(tot_lyr_cycles/tot_tiles))))
+      print("Latency: {:.2}ms".format(((tot_lyr_cycles/tot_tiles)/int(hw_cfg['SYSTEM']['FREQ'])*1000)))
+   
    visual.resource_table(hw_cfg, graph)
 
 if __name__ == "__main__":

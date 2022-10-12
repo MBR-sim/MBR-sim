@@ -17,7 +17,7 @@ def resource_table(hw_cfg, graph):
     maxWidth = 0
     # graph.print_nodes()
     # print(util.Node.convID)
-    graph.nodes.sort(key = lambda node: node.convID)
+    graph.nodes.sort(key = lambda node: node.convID[0])
     for r in range(0, rows):
         row = []
         cycles = []
