@@ -33,9 +33,9 @@ class Mapper:
 
             #Setting Datatype of each node
             if self.hw_cfg['DATATYPE']['USE_GLOBAL'] == "1":
-                node.globalInDatatype = args.input_datatype
-                node.globalOutDatatype = args.output_datatype
-                node.globalWgtDatatype = args.weight_datatype
+                node.inDatatype = args.input_datatype
+                node.outDatatype = args.output_datatype
+                node.wgtDatatype = args.weight_datatype
             elif self.hw_cfg['DATATYPE']['USE_WORKLOAD'] == "1":
                 node.inDatatype = row['InDatatype']
                 node.outDatatype = row['OutDatatype']
