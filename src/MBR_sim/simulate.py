@@ -9,8 +9,8 @@ def calculateSIMDCycles(graph, hw_cfg):
         if (node.op_type not in util.linearTypes):
             op_type = node.op_type.upper()
             OutT = node.output_t_size[-1]
-            if op_type in hw_cfg['SIMD_PERF']:
-                node.simd_cycles = OutT//int(hw_cfg['SIMD_PERF'][op_type])
+            if op_type in hw_cfg['SIMD_PERF_' + node.inDatatype.upper()]:
+                node.simd_cycles = OutT//int(hw_cfg['SIMD_PERF_' + node.inDatatype.upper()][op_type])
             else:
                 raise Exception("SIMD OP: {} NOT SUPPORTED".format(op_type)) #Don't Break, print warning and add defaults
 

@@ -52,7 +52,7 @@ class Node ():
         self.load_cycles = self.input_t_size[3]//int(hw_cfg['TILE']['NOC_BW'])
         self.store_cycles = self.output_t_size[3]//int(hw_cfg['TILE']['NOC_BW'])
         if any([linType in self.op_type for linType in util.linearTypes]):
-            self.linear_cycles = (self.MACS//int(hw_cfg['TILE']['MAC_BW']))//simulate.mac_util(self, hw_cfg)
+            self.linear_cycles = (self.MACS//int(hw_cfg['TILE']['MAC_BW']))/simulate.mac_util(self, hw_cfg)
         else:
             self.linear_cycles = 0
         self.layer_cycles = max(self.load_cycles, self.simd_cycles, self.linear_cycles, self.store_cycles)
