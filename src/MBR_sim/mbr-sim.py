@@ -57,13 +57,13 @@ def main(args):
    print("Mac Cycles: {:.2e}".format(tot_lin_cycles))
    if args.parallelism == "tensor":
       #Mac Util = (Total MACs/(MAC_bw * tot_tiles))/(max_lyr_cycles)
-      print("Mac Util: {:.0%}".format((tot_lin_cycles)/(max_lyr_cycles * tot_tiles)))   #Ratio of 
+      print("Mac Util: {:.0%}".format((tot_MACS/(int(hw_cfg['TILE']['MAC_BW']) * tot_tiles))/(max_lyr_cycles)))   #Ratio of 
       print("Total Cycles: {:.2e}".format(max_lyr_cycles))
       print("IPS/Chip: {}".format((int(hw_cfg['SYSTEM']['FREQ'])/max_lyr_cycles)))
       print("Latency: {:.2}ms".format((max_lyr_cycles/int(hw_cfg['SYSTEM']['FREQ'])*1000)))
    elif args.parallelism == "pipeline":
       #Mac Util = (Total MACs/(MAC_bw * tot_tiles))/(tot_lyr_cycles/tot_tiles)
-      print("Mac Util: {:.0%}".format(tot_lin_cycles/((tot_lyr_cycles/tot_tiles) * tot_tiles)))
+      print("Mac Util: {:.0%}".format((tot_MACS/(int(hw_cfg['TILE']['MAC_BW']) * tot_tiles))/(max_lyr_cycles)))
       print("Total Cycles: {:.2e}".format(tot_lyr_cycles/tot_tiles))
       print("IPS/Chip: {}".format((int(hw_cfg['SYSTEM']['FREQ'])/(tot_lyr_cycles/tot_tiles))))
       print("Latency: {:.2}ms".format(((tot_lyr_cycles/tot_tiles)/int(hw_cfg['SYSTEM']['FREQ'])*1000)))

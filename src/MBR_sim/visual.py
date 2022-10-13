@@ -45,7 +45,7 @@ def resource_table(hw_cfg, graph):
     cellHeight = 4 * maxLines
     sns.set(rc = {'figure.figsize':(cellWidth * (cols/8),cellHeight * (rows/8))})
     ax = sns.heatmap(cellCycles, annot=cellText, fmt="s", cbar = True,  linewidths=.5)
-    plt.savefig("resource_heatmap.svg")
+    plt.savefig("resource_heatmap.png")
 
 
 
