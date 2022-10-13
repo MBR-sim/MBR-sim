@@ -13,7 +13,7 @@ class Mapper:
         self.hw_cfg = hw_cfg
         pass
     def generate_nodes(self, csv_file, args):
-        df = pd.read_csv(csv_file, comment=args.comment)
+        df = pd.read_csv(csv_file)
 
         #Format Data
         df.dropna(subset=['LyrName'], inplace=True)
@@ -27,19 +27,23 @@ class Mapper:
                 maxWgtCapacity = int(self.hw_cfg['SYSTEM']['MAX_WEIGHT_CAPACITY'])
             node = Node(row['LyrName'])
             node.op_type = row['Type']
-
-            #Setting Datatypes
-            node.inDatatype = row['InDatatype']
-            node.outDatatype = row['OutDatatype']
-            node.wgtDatatype = row['WgtDatatype']
-
             if node.op_type in linearTypes:
                 node.convID = [Node.convID]
                 Node.convID += 1
-                if self.hw_cfg['DATATYPE']['USE_GLOBAL'] == "1":
-                    node.inDatatype = args.input_datatype
-                    node.outDatatype = args.output_datatype
-                    node.wgtDatatype = args.weight_datatype
+
+            #Setting Datatype of each node
+            if self.hw_cfg['DATATYPE']['USE_GLOBAL'] == "1":
+                node.inDatatype = args.input_datatype
+                node.outDatatype = args.output_datatype
+                node.wgtDatatype = args.weight_datatype
+            elif self.hw_cfg['DATATYPE']['USE_WORKLOAD'] == "1":
+                node.inDatatype = row['InDatatype']
+                node.outDatatype = row['OutDatatype']
+                node.wgtDatatype = row['WgtDatatype']
+            else:
+                node.inDatatype = 'int8'
+                node.outDatatype = 'int8'
+                node.wgtDatatype = 'int8'
 
 
             node.output_t_size = [row['OutT(W)'], row['OutT(H)'], row['OutT(D)']]

@@ -2,6 +2,7 @@ LICENSE
 README.md
 pyproject.toml
 src/MBR_sim/__init__.py
+src/MBR_sim/csv_unlooper.py
 src/MBR_sim/fusion.py
 src/MBR_sim/mapper.py
 src/MBR_sim/mbr-sim.py
@@ -11,5 +12,6 @@ src/MBR_sim/visual.py
 src/MBR_sim.egg-info/PKG-INFO
 src/MBR_sim.egg-info/SOURCES.txt
 src/MBR_sim.egg-info/dependency_links.txt
+src/MBR_sim.egg-info/requires.txt
 src/MBR_sim.egg-info/top_level.txt
 src/MBR_sim/workloads/scripts/cvt_ir.py
