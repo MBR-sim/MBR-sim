@@ -19,6 +19,7 @@ def main(args):
 
    map = mapper.Mapper(hw_cfg)
 
+   # graph = map.generate_nodes(1)
    graph = map.generate_nodes(csv_file, args)
    # graph.print_nodes()
    
@@ -42,23 +43,28 @@ def main(args):
    tot_lin_cycles = 0
    tot_tiles = 0
    tot_lyr_cycles = 0
+   tot_simd_cycles = 0
    max_lyr_cycles = 0
    for node in graph.nodes:
       tot_MACS += node.MACS
       tot_lin_cycles += node.linear_cycles
       tot_tiles += node.tiles
       tot_lyr_cycles += node.layer_cycles
+      tot_simd_cycles += node.simd_cycles
       max_lyr_cycles = max(max_lyr_cycles, node.layer_cycles)
 
+   print("Total SIMD Cycles: {:.2e}".format(tot_simd_cycles))
    print("Total MACS: {:.2e}".format(tot_MACS))
    print("Mac Cycles: {:.2e}".format(tot_lin_cycles))
    if args.parallelism == "tensor":
-      print("Mac Util: {:.0%}".format((tot_MACS/int(hw_cfg['TILE']['MAC_BW']))/(max_lyr_cycles * tot_tiles)))
+      #Mac Util = (Total MACs/(MAC_bw * tot_tiles))/(max_lyr_cycles)
+      print("Mac Util: {:.0%}".format((tot_MACS/(int(hw_cfg['TILE']['MAC_BW']) * tot_tiles))/(max_lyr_cycles)))   #Ratio of 
       print("Total Cycles: {:.2e}".format(max_lyr_cycles))
       print("IPS/Chip: {}".format((int(hw_cfg['SYSTEM']['FREQ'])/max_lyr_cycles)))
       print("Latency: {:.2}ms".format((max_lyr_cycles/int(hw_cfg['SYSTEM']['FREQ'])*1000)))
    elif args.parallelism == "pipeline":
-      print("Mac Util: {:.0%}".format((tot_MACS/int(hw_cfg['TILE']['MAC_BW']))/((tot_lyr_cycles/tot_tiles) * tot_tiles)))
+      #Mac Util = (Total MACs/(MAC_bw * tot_tiles))/(tot_lyr_cycles/tot_tiles)
+      print("Mac Util: {:.0%}".format((tot_MACS/(int(hw_cfg['TILE']['MAC_BW']) * tot_tiles))/(max_lyr_cycles)))
       print("Total Cycles: {:.2e}".format(tot_lyr_cycles/tot_tiles))
       print("IPS/Chip: {}".format((int(hw_cfg['SYSTEM']['FREQ'])/(tot_lyr_cycles/tot_tiles))))
       print("Latency: {:.2}ms".format(((tot_lyr_cycles/tot_tiles)/int(hw_cfg['SYSTEM']['FREQ'])*1000)))
@@ -77,5 +83,9 @@ if __name__ == "__main__":
    parser.add_argument("-i", "--input_datatype", help = "the global input datatype for workload", type=str)
    parser.add_argument("-o", "--output_datatype", help = "the global output datatype for workload", type=str)
    parser.add_argument("-w", "--weight_datatype", help = "the global weight datatype for workload", type=str)
+   parser.add_argument("--comment", help="comment character for csv files", type=str, default="#")
    args = parser.parse_args()
+
+   assert len(args.comment) == 1, "Comment Argument should only be 1 character!"
+
    main(args)

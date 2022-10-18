@@ -12,7 +12,9 @@ class Mapper:
     def __init__(self, hw_cfg) -> None:
         self.hw_cfg = hw_cfg
         pass
-    def generate_nodes(self, csv_file, args):
+
+    def generate_nodes(self, csv_file, arguments):
+        args = arguments
         df = pd.read_csv(csv_file, comment=args.comment)
 
         #Format Data
