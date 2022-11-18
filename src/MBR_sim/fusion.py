@@ -64,8 +64,7 @@ def inline_linear_simd(graph, hw_cfg):
     graph.nodes = fused_nodes
     return graph
 
-def spread_layers(graph, hw_cfg):
-    print("HERE")
+def spread_layers_capped(graph, hw_cfg):
     while len(graph.nodes) < int(hw_cfg['SYSTEM']['TILES']):
         graph.nodes.sort(key = lambda node: node.layer_cycles, reverse=True)
         largest_node = graph.nodes.pop(0)
@@ -75,42 +74,127 @@ def spread_layers(graph, hw_cfg):
             split_node = largest_node.copy()
             if (split_node.name[-3:-1] == "__"): split_node.name = name + str(i)
             else: split_node.name = name + "__{}".format(i)
-            split_node.weight_t_size[3] //= 2 #Divde Input and Output tensors
+            split_node.weight_t_size[3] //= 2
+            split_node.output_t_size = [dimension//2 for dimension in split_node.output_t_size]
+            split_node.input_t_size = [dimension//2 for dimension in split_node.input_t_size]
             split_node.MACS //= 2
             split_node.simd_cycles //= 2
             split_node.calculatePerf(hw_cfg)
-            print(largest_node.layer_cycles)
-            print(split_node.layer_cycles)
-            print()
             graph.nodes.append(split_node)
 
-def combine_multiple_layers(graph, hw_cfg):
-    while (len(graph.nodes) > int(hw_cfg['SYSTEM']['TILES'])):
-        graph.nodes.sort(key=lambda node: -node.layer_cycles)
+def spread_layers_threshold(graph, hw_cfg, threshold):
+    avgCycles = sum([node.layer_cycles for node in graph.nodes])/len(graph.nodes)
+    graph.nodes.sort(key = lambda node: node.layer_cycles, reverse=True)
+    while graph.nodes[0].layer_cycles > avgCycles * threshold:
+        graph.nodes.sort(key = lambda node: node.layer_cycles, reverse=True)
+        largest_node = graph.nodes.pop(0)
+        # largest_node.print_node()
+        name = largest_node.name
+        for i in range(0,2):
+            split_node = largest_node.copy()
+            if (split_node.name[-3:-1] == "__"): split_node.name = name + str(i)
+            else: split_node.name = name + "__{}".format(i)
+            split_node.weight_t_size[3] //= 2 #Divde Input and Output tensors
+            split_node.output_t_size = [dimension//2 for dimension in split_node.output_t_size]
+            split_node.input_t_size = [dimension//2 for dimension in split_node.input_t_size]
+            split_node.MACS //= 2
+            split_node.simd_cycles //= 2
+            split_node.calculatePerf(hw_cfg)
+            graph.nodes.append(split_node)
+        avgCycles = sum([node.layer_cycles for node in graph.nodes])/len(graph.nodes)
+        graph.nodes.sort(key = lambda node: node.layer_cycles, reverse=True)
+
+
+def combine_multiple_layers_capped(graph, hw_cfg):
+    graph.nodes.sort(key=lambda node: -node.layer_cycles)
+    if hw_cfg['SYSTEM']['ENABLE_WEIGHT_SPLITTING'] == "1":
+        maxWgtCapacity = int(hw_cfg['SYSTEM']['MAX_WEIGHT_CAPACITY'])
+    else:
+        maxWgtCapacity = 2 ** 40
+    excludedNodes = []
+    while (len(graph.nodes) + (len(excludedNodes)) > int(hw_cfg['SYSTEM']['TILES'])):
+        if (len(graph.nodes) == 0):
+            print("Can not fit within parameters!")
+            break
         smallestNode = graph.nodes.pop(-1)
-        print(smallestNode.layer_cycles)
         #Finding node with convolution ID 1 above and 1 below
-        beforeNode = next((node for node in graph.nodes if (smallestNode.convID[0] - 1) in node.convID), None)
-        afterNode = next((node for node in graph.nodes if (smallestNode.convID[0] + 1) in node.convID), None)
-        print(graph.nodes)
-        if beforeNode is not None and afterNode is not None:
-            pairedNode = beforeNode if beforeNode.layer_cycles < afterNode.layer_cycles else afterNode
-        elif beforeNode is not None and afterNode is None:
-            pairedNode = beforeNode
-        elif beforeNode is None and afterNode is not None:
-            pairedNode = afterNode
+        possiblePairedNodes = []
+        possiblePairedNodes.extend([node for node in graph.nodes if (list(smallestNode.convID)[0] - 1) in node.convID])
+        possiblePairedNodes.extend([node for node in graph.nodes if (list(smallestNode.convID)[0] + 1) in node.convID])
+        possiblePairedNodes.sort(key = lambda node: node.layer_cycles)
+        while (len(possiblePairedNodes) > 0) and (possiblePairedNodes[0].weight_size + smallestNode.weight_size > maxWgtCapacity):
+            possiblePairedNodes.pop(0)
+        if len(possiblePairedNodes) > 0:
+            pairedNode = possiblePairedNodes[0]
         else:
-            raise Exception("Can not combine only 1 layer!")
+            excludedNodes.append(smallestNode)
+            continue
         graph.nodes.remove(pairedNode)
 
         combinedNode = smallestNode.copy()
         combinedNode.name += ";" + pairedNode.name
         combinedNode.op_type = "{};{}".format(smallestNode.op_type,pairedNode.op_type)
-        combinedNode.output_t_size = pairedNode.output_t_size
-        combinedNode.outDatatype = pairedNode.outDatatype
+        if (list(smallestNode.convID)[0] - 1) in pairedNode.convID: #pariedNode is before smallestNode
+            combinedNode.output_t_size = pairedNode.output_t_size
+            combinedNode.outDatatype = pairedNode.outDatatype
+        elif (list(smallestNode.convID)[0] + 1) in pairedNode.convID: #pariedNode is before afterNode
+            combinedNode.input_t_size = pairedNode.input_t_size
+            combinedNode.inDatatype = pairedNode.inDatatype
         combinedNode.simd_cycles += pairedNode.simd_cycles
         combinedNode.MACS += pairedNode.MACS
-        combinedNode.convID.extend(pairedNode.convID)
+        combinedNode.weight_size += pairedNode.weight_size
+        combinedNode.convID = combinedNode.convID.union(pairedNode.convID)
         
         combinedNode.calculatePerf(hw_cfg)
         graph.nodes.append(combinedNode)
+        graph.nodes.sort(key = lambda node: -node.layer_cycles)
+    graph.nodes.extend(excludedNodes)
+    graph.nodes.sort(key = lambda node: -node.layer_cycles)
+
+
+def combine_multiple_layers_threshold(graph, hw_cfg, threshold):
+    avgCycles = sum([node.layer_cycles for node in graph.nodes])/len(graph.nodes)
+    graph.nodes.sort(key = lambda node: -node.layer_cycles)
+    if hw_cfg['SYSTEM']['ENABLE_WEIGHT_SPLITTING'] == "1":
+        maxWgtCapacity = int(hw_cfg['SYSTEM']['MAX_WEIGHT_CAPACITY'])
+    else:
+        maxWgtCapacity = 2 ** 40
+    excludedNodes = []
+    while graph.nodes[-1].layer_cycles < avgCycles * threshold:
+        graph.nodes.sort(key=lambda node: -node.layer_cycles)
+        smallestNode = graph.nodes.pop(-1)
+        #Finding node with convolution ID 1 above and 1 below
+        possiblePairedNodes = []
+        possiblePairedNodes.extend([node for node in graph.nodes if (list(smallestNode.convID)[0] - 1) in node.convID])
+        possiblePairedNodes.extend([node for node in graph.nodes if (list(smallestNode.convID)[0] + 1) in node.convID])
+        possiblePairedNodes.sort(key = lambda node: node.layer_cycles)
+        while (len(possiblePairedNodes) > 0) and (possiblePairedNodes[0].weight_size + smallestNode.weight_size > maxWgtCapacity):
+            possiblePairedNodes.pop(0)
+        if len(possiblePairedNodes) > 0:
+            pairedNode = possiblePairedNodes[0]
+        else:
+            excludedNodes.append(smallestNode)
+            continue
+        graph.nodes.remove(pairedNode)
+
+        combinedNode = smallestNode.copy()
+        combinedNode.name += ";" + pairedNode.name
+        combinedNode.op_type = "{};{}".format(smallestNode.op_type,pairedNode.op_type)
+        if (list(smallestNode.convID)[0] - 1) in pairedNode.convID: #pariedNode is before smallestNode
+            combinedNode.output_t_size = pairedNode.output_t_size
+            combinedNode.outDatatype = pairedNode.outDatatype
+        elif (list(smallestNode.convID)[0] + 1) in pairedNode.convID: #pariedNode is before afterNode
+            combinedNode.input_t_size = pairedNode.input_t_size
+            combinedNode.inDatatype = pairedNode.inDatatype
+        combinedNode.simd_cycles += pairedNode.simd_cycles
+        combinedNode.MACS += pairedNode.MACS
+        combinedNode.weight_size += pairedNode.weight_size
+        combinedNode.convID = combinedNode.convID.union(pairedNode.convID)
+        
+        combinedNode.calculatePerf(hw_cfg)
+        graph.nodes.append(combinedNode)
+        avgCycles = sum([node.layer_cycles for node in graph.nodes])/len(graph.nodes)
+        graph.nodes.sort(key = lambda node: -node.layer_cycles)
+    graph.nodes.extend(excludedNodes)
+    graph.nodes.sort(key = lambda node: -node.layer_cycles)
+

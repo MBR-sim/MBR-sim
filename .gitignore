@@ -1,3 +1,5 @@
-MBR-sim.code-workspace
-src/MBR_sim/__pycache__
 resource_heatmap.svg
+resource_heatmap.png
+.vscode/launch.json
+src/MBR_sim/__pycache__
+src/MBR_sim/workloads/out/*

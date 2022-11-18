@@ -28,13 +28,16 @@ class Mapper:
             node = Node(row['LyrName'])
             node.op_type = row['Type']
 
-            #Setting Datatypes
             node.inDatatype = row['InDatatype']
             node.outDatatype = row['OutDatatype']
             node.wgtDatatype = row['WgtDatatype']
+            if 'DepthWise' in df.columns and not pd.isnull(row['DepthWise']):
+                node.depthwise = int(row['DepthWise'])
+            if 'Group' in df.columns and not pd.isnull(row['Group']):
+                node.group = int(row['Group'])
 
             if node.op_type in linearTypes:
-                node.convID = [Node.convID]
+                node.convID = set([Node.convID])
                 Node.convID += 1
                 if self.hw_cfg['DATATYPE']['USE_GLOBAL'] == "1":
                     node.inDatatype = args.input_datatype
@@ -44,7 +47,7 @@ class Mapper:
 
             node.output_t_size = [row['OutT(W)'], row['OutT(H)'], row['OutT(D)']]
             node.input_t_size = [row['InT(W)'], row['InT(H)'], row['InT(D)']]
-            if (not row.isnull().any()):
+            if (not row[['WgtT(W)', 'WgtT(H)', 'WgtT(D)', 'WgtT(Num)']].isnull().any()):
                 node.weight_t_size = [int(row['WgtT(W)']), int(row['WgtT(H)']), int(row['WgtT(D)']), int(row['WgtT(Num)'])]
             node.tile = i
             node.calculatePerf(self.hw_cfg)
@@ -70,8 +73,10 @@ class Mapper:
     def fuse_nodes(self):
         fusion.fuse_simd(self.graph, self.hw_cfg)
         fusion.inline_linear_simd(self.graph, self.hw_cfg)
-        fusion.spread_layers(self.graph, self.hw_cfg)
-        fusion.combine_multiple_layers(self.graph, self.hw_cfg)
+        fusion.combine_multiple_layers_threshold(self.graph, self.hw_cfg, 0.75)
+        fusion.spread_layers_capped(self.graph, self.hw_cfg)
+        fusion.spread_layers_threshold(self.graph, self.hw_cfg, 1.2)
+        fusion.combine_multiple_layers_capped(self.graph, self.hw_cfg)
         return self.graph
 
 

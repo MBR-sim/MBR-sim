@@ -4,7 +4,7 @@ import MBR_sim.simulate as simulate
 import MBR_sim.util as util
 # Node and Graph Class
 
-linearTypes = ["Convolution"]
+linearTypes = ["Convolution", "Convolution_DW", "MatMul"]
 
 class Node ():
     uidCounter = 0
@@ -14,9 +14,11 @@ class Node ():
         self.name = name
         self.uid = Node.uidCounter
         Node.uidCounter += 1
-        self.convID = []
+        self.convID = set()
         self.op_type = None
         self.data_type = None
+        self.depthwise = 0
+        self.group = 1
         self.tiles = None
         self.tile = None
     
@@ -27,6 +29,7 @@ class Node ():
         self.input_t_size = None #(W, H, D, Size)
         self.output_t_size = None #(W, H, D, Size)
         self.weight_t_size = None #(W, H, D, N, Size)
+        self.weight_size = 0
         self.ops_cnt = None
         
         self.compute_cycles = 0
@@ -41,18 +44,19 @@ class Node ():
         self.input_deps = None
         self.output_deps = None
 
-    def calculatePerf(self, hw_cfg):
-        self.convID.sort()
+    def calculatePerf(self, hw_cfg, initializeWeightSize = False):
         #Calculates Volumes
         self.input_t_size = self.input_t_size[:3] + [math.prod(self.input_t_size[:3])]
         self.output_t_size = self.output_t_size[:3] + [math.prod(self.output_t_size[:3])]
         if self.weight_t_size is not None:
             self.weight_t_size = self.weight_t_size[:4] + [math.prod(self.weight_t_size[:4])]
+            if initializeWeightSize:
+                self.weight_size = self.weight_t_size[-1]
 
         self.load_cycles = self.input_t_size[3]//int(hw_cfg['TILE']['NOC_BW'])
         self.store_cycles = self.output_t_size[3]//int(hw_cfg['TILE']['NOC_BW'])
         if any([linType in self.op_type for linType in util.linearTypes]):
-            self.linear_cycles = (self.MACS//int(hw_cfg['TILE']['MAC_BW']))/simulate.mac_util(self, hw_cfg)
+            self.linear_cycles = int(self.MACS//int(hw_cfg['TILE']['MAC_BW']))/simulate.mac_util(self, hw_cfg)
         else:
             self.linear_cycles = 0
         self.layer_cycles = max(self.load_cycles, self.simd_cycles, self.linear_cycles, self.store_cycles)
@@ -60,8 +64,10 @@ class Node ():
         self.stage_cycles = self.layer_cycles//self.tiles
 
     def __repr__(self):
-        return "{}; {}".format(self.name, self.convID[0])
+        return "{}; {}".format(self.name, list(self.convID)[0])
 
+    def __lt__(self, other):
+        return self.linear_cycles > other.linear_cycles
     # Method
     def print_node(self):
         print("Name: {}, UID: {}, CONVID: {}".format(self.name, self.uid, self.convID[0]))
@@ -80,7 +86,9 @@ class Node ():
         newNode.data_type = self.data_type
         newNode.tiles = self.tiles
         newNode.tile = self.tile
-        
+        newNode.group = self.group
+        newNode.depthwise = self.depthwise
+
         newNode.inDatatype = self.inDatatype
         newNode.outDatatype = self.outDatatype
         newNode.wgtDatatype = self.wgtDatatype
@@ -88,6 +96,7 @@ class Node ():
         newNode.input_t_size = self.input_t_size #(W, H, D, Size)
         newNode.output_t_size = self.output_t_size #(W, H, D, Size)
         newNode.weight_t_size = self.weight_t_size #(W, H, D, N, Size)
+        newNode.weight_size = self.weight_size
         newNode.ops_cnt = self.ops_cnt
         
         newNode.compute_cycles = self.compute_cycles
@@ -130,15 +139,11 @@ class Graph():
             print()
   
 def tileToPos(hw_cfg, tile):
-    print(tile)
     tile -= 1
     num_tiles = int(hw_cfg['SYSTEM']['TILES'])
     rows, cols = factint(num_tiles)
-    print(rows, cols)
     row = tile//cols
     col = tile%rows if row %2 == 0 else (cols - tile%rows - 1)
-    print(row, col)
-    print()
     return int(row),int(col)
 
 def factint(n):

@@ -1,15 +1,25 @@
 # Main python file
 #IMPORTS
 import configparser
+import csv
 import MBR_sim.mapper as mapper
 import MBR_sim.simulate as simulate
 import MBR_sim.visual as visual
 import argparse
+from datetime import datetime
+import sys
+import os
 
 def main(args):
-   #Assign unique Conv ID.
+   now = datetime.now() 
+   dftime = now.strftime("%d_%m_%Y %H:%M:%S")
+   directory = sys.path[0] + "/workloads/out/" + args.csv.split(".")[0].split("/")[-1] + " " + dftime
+   if not os.path.exists(directory):
+      os.makedirs(directory) 
+   
    hw_cfg = configparser.ConfigParser()
    hw_cfg.read(args.config)
+
 
    csv_file = args.csv
    if (args.macbw is not None): hw_cfg['TILE']['MAC_BW'] = str(args.macbw)
@@ -27,7 +37,7 @@ def main(args):
    # graph.print_nodes()
 
    for node in graph.nodes:
-      node.calculatePerf(hw_cfg)
+      node.calculatePerf(hw_cfg, initializeWeightSize = True)
 
    graph = map.fuse_nodes()
    # graph.print_nodes()
@@ -35,7 +45,7 @@ def main(args):
    for node in graph.nodes:
       node.calculatePerf(hw_cfg)
 
-   graph.nodes.sort(key=lambda node: node.convID[0])
+   graph.nodes.sort(key=lambda node: list(node.convID)[0])
 
    #Finding Totals
    tot_MACS = 0
@@ -57,18 +67,28 @@ def main(args):
    print("Mac Cycles: {:.2e}".format(tot_lin_cycles))
    if args.parallelism == "tensor":
       #Mac Util = (Total MACs/(MAC_bw * tot_tiles))/(max_lyr_cycles)
-      print("Mac Util: {:.0%}".format((tot_MACS/(int(hw_cfg['TILE']['MAC_BW']) * tot_tiles))/(max_lyr_cycles)))   #Ratio of 
-      print("Total Cycles: {:.2e}".format(max_lyr_cycles))
-      print("IPS/Chip: {}".format((int(hw_cfg['SYSTEM']['FREQ'])/max_lyr_cycles)))
+      print("Mac Util: {:.0%}".format((tot_MACS/(int(hw_cfg['TILE']['MAC_BW']) * tot_tiles))/(max_lyr_cycles))) 
+      print("Total Cycles: {:.0f}".format(max_lyr_cycles))
+      print("IPS/Chip: {:.0f}".format((int(hw_cfg['SYSTEM']['FREQ'])/max_lyr_cycles)))
       print("Latency: {:.2}ms".format((max_lyr_cycles/int(hw_cfg['SYSTEM']['FREQ'])*1000)))
    elif args.parallelism == "pipeline":
       #Mac Util = (Total MACs/(MAC_bw * tot_tiles))/(tot_lyr_cycles/tot_tiles)
       print("Mac Util: {:.0%}".format((tot_MACS/(int(hw_cfg['TILE']['MAC_BW']) * tot_tiles))/(max_lyr_cycles)))
-      print("Total Cycles: {:.2e}".format(tot_lyr_cycles/tot_tiles))
-      print("IPS/Chip: {}".format((int(hw_cfg['SYSTEM']['FREQ'])/(tot_lyr_cycles/tot_tiles))))
+      print("Total Cycles: {:.0f}".format(tot_lyr_cycles/tot_tiles))
+      print("IPS/Chip: {:.0f}".format((int(hw_cfg['SYSTEM']['FREQ'])/(tot_lyr_cycles/tot_tiles))))
       print("Latency: {:.2}ms".format(((tot_lyr_cycles/tot_tiles)/int(hw_cfg['SYSTEM']['FREQ'])*1000)))
    
-   visual.resource_table(hw_cfg, graph)
+   if args.testing:
+      f = open("data.csv", 'a')
+      writer = csv.writer(f)
+      if args.parallelism == "tensor":
+         row = [(int(hw_cfg['SYSTEM']['FREQ'])/max_lyr_cycles),(max_lyr_cycles/int(hw_cfg['SYSTEM']['FREQ'])*1000),(tot_MACS/(int(hw_cfg['TILE']['MAC_BW']) * tot_tiles))/(max_lyr_cycles), max_lyr_cycles] #IPS/Chip, Latency, % Mac Util, Stage Cycles
+      elif args.parallelism == "pipeline":
+         row = [(int(hw_cfg['SYSTEM']['FREQ'])/(tot_lyr_cycles/tot_tiles)),((tot_lyr_cycles/tot_tiles)/int(hw_cfg['SYSTEM']['FREQ'])*1000),(tot_MACS/(int(hw_cfg['TILE']['MAC_BW']) * tot_tiles))/(max_lyr_cycles), tot_lyr_cycles/tot_tiles] #IPS/Chip, Latency, % Mac Util, Stage Cycles
+      writer.writerow(row)
+      f.close()
+   if args.verbose != 0: visual.resource_table(hw_cfg, graph, directory)
+   if args.verbose != 0: visual.csvOut(csv_file, graph, directory)
 
 if __name__ == "__main__":
    parser = argparse.ArgumentParser()
@@ -82,6 +102,8 @@ if __name__ == "__main__":
    parser.add_argument("-i", "--input_datatype", help = "the global input datatype for workload", type=str)
    parser.add_argument("-o", "--output_datatype", help = "the global output datatype for workload", type=str)
    parser.add_argument("-w", "--weight_datatype", help = "the global weight datatype for workload", type=str)
+   parser.add_argument("-t", "--testing", help = "records output data into csv for easy upload to excel", type=bool)
+   parser.add_argument("-v", "--verbose", help = "records output data into csv for easy upload to excel", type=int, default=1)
    parser.add_argument("--comment", help="comment character for csv files", type=str, default="#")
    args = parser.parse_args()
 

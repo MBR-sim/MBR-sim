@@ -1,0 +1,9 @@
+MAC Bandwidth Sensitivity
+512, 1k, 2k
+# of Tiles
+32
+3 Workloads:
+ResNet50, BERT-Large
+
+Load Capacity
+Infinite
