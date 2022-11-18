@@ -1,6 +1,7 @@
 LICENSE
 README.md
 pyproject.toml
+setup.cfg
 src/MBR_sim/__init__.py
 src/MBR_sim/csv_unlooper.py
 src/MBR_sim/fusion.py

@@ -29,6 +29,7 @@ def main(args):
 
    map = mapper.Mapper(hw_cfg)
 
+   # graph = map.generate_nodes(1)
    graph = map.generate_nodes(csv_file, args)
    # graph.print_nodes()
    

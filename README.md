@@ -2,7 +2,7 @@
 
 ## Installation
 1. Requirements: Python 3.8
-2. Open folder and run: `pip install .` to get finished build
+2. Open folder and run: `pip3 install .` to install the required packages.
 
 ## Command Line Arguments
 **Sample Command** `python3 src/MBR_sim/mbr-sim.py`
@@ -57,4 +57,4 @@
 
     IPS: 4982
     
-**Authors**: Mehul Goel, Ben Maydan, Raj Parihar
+**Authors**: Ben Maydan, Mehul Goel, Raj Parihar
