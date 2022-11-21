@@ -50,6 +50,7 @@ def main(args):
 
    #Finding Totals
    tot_MACS = 0
+   tot_Weight = 0
    tot_lin_cycles = 0
    tot_tiles = 0
    tot_lyr_cycles = 0
@@ -57,6 +58,7 @@ def main(args):
    max_lyr_cycles = 0
    for node in graph.nodes:
       tot_MACS += node.MACS
+      tot_Weight += node.weight_size
       tot_lin_cycles += node.linear_cycles
       tot_tiles += node.tiles
       tot_lyr_cycles += node.layer_cycles
@@ -65,6 +67,7 @@ def main(args):
 
    print("Total SIMD Cycles: {:.2e}".format(tot_simd_cycles))
    print("Total MACS: {:.2e}".format(tot_MACS))
+   print("Total Weights: {:.2e}".format(tot_Weight))
    print("Mac Cycles: {:.2e}".format(tot_lin_cycles))
    if args.parallelism == "tensor":
       #Mac Util = (Total MACs/(MAC_bw * tot_tiles))/(max_lyr_cycles)
@@ -88,8 +91,8 @@ def main(args):
          row = [(int(hw_cfg['SYSTEM']['FREQ'])/(tot_lyr_cycles/tot_tiles)),((tot_lyr_cycles/tot_tiles)/int(hw_cfg['SYSTEM']['FREQ'])*1000),(tot_MACS/(int(hw_cfg['TILE']['MAC_BW']) * tot_tiles))/(max_lyr_cycles), tot_lyr_cycles/tot_tiles] #IPS/Chip, Latency, % Mac Util, Stage Cycles
       writer.writerow(row)
       f.close()
-   if args.verbose != 0: visual.resource_table(hw_cfg, graph, directory)
    if args.verbose != 0: visual.csvOut(csv_file, graph, directory)
+   if args.verbose != 0: visual.resource_table(hw_cfg, graph, directory)
 
 if __name__ == "__main__":
    parser = argparse.ArgumentParser()

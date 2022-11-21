@@ -49,7 +49,7 @@ class Node ():
         self.input_t_size = self.input_t_size[:3] + [math.prod(self.input_t_size[:3])]
         self.output_t_size = self.output_t_size[:3] + [math.prod(self.output_t_size[:3])]
         if self.weight_t_size is not None:
-            self.weight_t_size = self.weight_t_size[:4] + [math.prod(self.weight_t_size[:4])]
+            self.weight_t_size = self.weight_t_size[:4] + [math.prod(self.weight_t_size[:4])/self.group]
             if initializeWeightSize:
                 self.weight_size = self.weight_t_size[-1]
 
@@ -68,9 +68,10 @@ class Node ():
 
     def __lt__(self, other):
         return self.linear_cycles > other.linear_cycles
+
     # Method
     def print_node(self):
-        print("Name: {}, UID: {}, CONVID: {}".format(self.name, self.uid, self.convID[0]))
+        print("Name: {}, UID: {}, CONVID: {}".format(self.name, self.uid, list(self.convID)[0]))
         print("Input Tensor:" + str(self.input_t_size))
         print("Ouput Tensor: " + str(self.output_t_size))
         print("Weight Tensor:" + str(self.weight_t_size))
@@ -78,6 +79,7 @@ class Node ():
             print("SIMD Cycles: {}".format(self.simd_cycles))
         if self.MACS:
             print("MACS: {}".format(self.MACS))
+            print("Linear Cycles: {}".format(self.linear_cycles))
     
     def copy(self):
         newNode = Node(self.name)
@@ -154,13 +156,9 @@ def factint(n):
             break
     return candidate, n //candidate
 
-
 #Helper function for mapper.split_by_weight
 def split(a, n):
     k, m = divmod(a, n)
     vals = [k + 1 for i in range(m)]
     vals.extend([k for i in range(n-m)])
     return vals
-
-
-

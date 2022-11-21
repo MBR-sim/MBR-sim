@@ -11,10 +11,8 @@ import math
 class Mapper:
     def __init__(self, hw_cfg) -> None:
         self.hw_cfg = hw_cfg
-        pass
 
-    def generate_nodes(self, csv_file, arguments):
-        args = arguments
+    def generate_nodes(self, csv_file, args):
         df = pd.read_csv(csv_file, comment=args.comment)
 
         #Format Data
@@ -63,11 +61,17 @@ class Mapper:
     def split_by_weight(self, node):
         maxWeight = int(self.hw_cfg['SYSTEM']['MAX_WEIGHT_CAPACITY'])
         slots = math.ceil(node.weight_t_size[-1]/maxWeight)
-        totalWeightNum = node.weight_t_size[-2]
+        if node.op_type in ["MatMul"]:
+            totalWeightNum = node.weight_t_size[1]
+        else:
+            totalWeightNum = node.weight_t_size[-2]
         split = []
         for i in range(0, slots):
             splitNode = node.copy()
-            splitNode.weight_t_size[-2] = util.split(totalWeightNum, slots)[i]
+            if node.op_type in ["MatMul"]:
+                splitNode.weight_t_size[1] = util.split(totalWeightNum, slots)[i]
+            else:
+                splitNode.weight_t_size[-2] = util.split(totalWeightNum, slots)[i]
             splitNode.calculatePerf(self.hw_cfg)
             split.append(splitNode)
         return split
@@ -75,10 +79,9 @@ class Mapper:
     def fuse_nodes(self):
         fusion.fuse_simd(self.graph, self.hw_cfg)
         fusion.inline_linear_simd(self.graph, self.hw_cfg)
-        fusion.combine_multiple_layers_threshold(self.graph, self.hw_cfg, 0.75)
         fusion.spread_layers_capped(self.graph, self.hw_cfg)
-        fusion.spread_layers_threshold(self.graph, self.hw_cfg, 1.2)
         fusion.combine_multiple_layers_capped(self.graph, self.hw_cfg)
+        fusion.two_pair_min(self.graph, self.hw_cfg)
         return self.graph
 
 
