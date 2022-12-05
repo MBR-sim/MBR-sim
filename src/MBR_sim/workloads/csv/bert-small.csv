@@ -1,0 +1,17 @@
+,,,,,,,,,,,,,,,,
+LyrName,Type,InT(W),InT(H),InT(D),OutT(W),OutT(H),OutT(D),WgtT(W),WgtT(H),WgtT(D),WgtT(Num),WgtT Size,InDatatype,WgtDatatype,OutDatatype,Repeat
+MatMul Q,MatMul,128,512,1,128,64,1,512,64,1,1,262144,Int8,Int8,Int8,8
+MatMul K,MatMul,128,512,1,128,64,1,512,64,1,1,262144,Int8,Int8,Int8,8
+Transpose T,Transpose,128,512,1,64,128,1,,,,,,Int8,Int8,Int8,8
+MatMul Q.KT,MatMul-SIMD,128,64,1,128,128,1,64,128,1,1,,Int8,Int8,Int8,8
+Softmax S,SoftMax,128,128,1,128,128,1,,,,,,Int8,Int8,Int8,8
+MatMul V,MatMul,128,512,1,128,64,1,512,64,1,1,262144,Int8,Int8,Int8,8
+MatMul S.V,MatMul-SIMD,128,128,1,128,64,1,128,64,1,1,,Int8,Int8,Int8,8
+FC1,MatMul,128,512,1,128,512,1,512,512,1,1,262144,Int8,Int8,Int8,1
+Add A,Add,128,512,1,128,512,1,,,,,,Int8,Int8,Int8,1
+LRN L,LayerNorm,128,512,1,128,512,1,,,,,,Int8,Int8,Int8,1
+FC2,MatMul,128,512,1,128,2048,1,512,2048,1,1,1048576,Int8,Int8,Int8,1
+GeLU G,GeLU,128,2048,1,128,2048,1,,,,,,Int8,Int8,Int8,1
+FC3,MatMul,128,2048,1,128,512,1,2048,512,1,1,1048576,Int8,Int8,Int8,1
+ADD B,Add,128,512,1,128,512,1,,,,,,Int8,Int8,Int8,1
+LRN R,LayerNorm,128,512,1,128,512,1,,,,,,Int8,Int8,Int8,1

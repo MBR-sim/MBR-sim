@@ -49,12 +49,12 @@ def main(args):
 
    #Finding Totals
    tot_MACS = 0
-   tot_Weight = 0
    tot_lin_cycles = 0
    tot_tiles = 0
    tot_lyr_cycles = 0
    tot_simd_cycles = 0
    max_lyr_cycles = 0
+   tot_weight = 0
    for node in graph.nodes:
       tot_MACS += node.MACS
       tot_lin_cycles += node.linear_cycles

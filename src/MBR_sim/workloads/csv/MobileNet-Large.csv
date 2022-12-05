@@ -1,0 +1,146 @@
+LyrName,Type,InT(W),InT(H),InT(D),InDatatype,OutT(W),OutT(H),OutT(D),OutDatatype,WgtT(W),WgtT(H),WgtT(D),WgtT(Num),WgtDatatype,Si,Sj,G,Activation Function,Parent Op,Num_Layers,Gflops,O/P Activation (MB),Weight (MB)
+Conv_0,Convolution,224,224,3,Int8,112,112,32,Int8,3,3,1,96,Int8,2,2,1,"BN, Swish",Head,1,2.17E-02,3.83E-01,8.24E-04
+Conv_DW_1,Convolution_DW,112,112,32,Int8,112,112,32,Int8,3,3,1,32,Int8,1,1,32,"BN, Swish",Conv_0,1,7.23E-03,3.83E-01,2.75E-04
+AvgPool_2_1,AvgPool,112,112,32,Int8,1,1,32,Int8,,,,,Int8,1,1,1,,Conv_DW_1,,,,
+Conv_2_1,Convolution,1,1,32,Int8,1,1,8,Int8,1,1,1,256,Int8,1,1,1,"BN, Swish",AvgPool_2_1,1,5.12E-07,7.63E-06,2.44E-04
+Conv_2_2,Convolution,1,1,8,Int8,1,1,32,Int8,1,1,1,256,Int8,1,1,1,BN ,Conv_2_1,1,5.12E-07,3.05E-05,2.44E-04
+Sigmoid_2,Sigmoid,1,1,32,Int8,1,1,32,Int8,,,,,Int8,,,,,Conv_2_2,,,,
+BroadCast Mul_2,BroadCast_Mul,1,1,32,Int8,112,112,32,Int8,,,,,Int8,,,,,"Sigmoid_2, Conv_1_1",,,,
+Conv_3,Convolution,112,112,32,Int8,112,112,32,Int8,1,1,1,1024,Int8,1,1,1,BN,BroadCast Mul_2,1,2.57E-02,3.83E-01,9.77E-04
+Conv_4,Convolution,112,112,32,Int8,112,112,96,Int8,1,1,1,3072,Int8,1,1,1,"BN, Swish",Conv_3,1,7.71E-02,1.15E+00,2.93E-03
+Conv_DW_5,Convolution_DW,112,112,96,Int8,56,56,96,Int8,3,3,1,96,Int8,2,2,96,"BN, Swish",Conv_4,1,5.42E-03,2.87E-01,8.24E-04
+AvgPool_6_1,AvgPool,56,56,96,Int8,1,1,96,Int8,,,,,Int8,1,1,1,,Conv_DW_5,,,,
+Conv_6_1,Convolution,1,1,96,Int8,1,1,4,Int8,1,1,1,384,Int8,1,1,1,"BN, Swish",AvgPool_6_1,1,7.68E-07,3.81E-06,3.66E-04
+Conv_6_2,Convolution,1,1,4,Int8,1,1,96,Int8,1,1,1,384,Int8,1,1,1,BN ,Conv_6_1,1,7.68E-07,9.16E-05,3.66E-04
+Sigmoid_6,Sigmoid,1,1,96,Int8,1,1,32,Int8,,,,,Int8,,,,,Conv_6_2,,,,
+BroadCast Mul_6,BroadCast_Mul,1,1,32,Int8,56,56,96,Int8,,,,,Int8,,,,,"Sigmoid_6, Conv_5",,,,
+Conv_7,Convolution,56,56,96,Int8,56,56,24,Int8,1,1,1,2304,Int8,1,1,1,"BN, Swish",BroadCast Mul_6,1,1.45E-02,7.18E-02,2.20E-03
+Conv_8,Convolution,56,56,24,Int8,56,56,144,Int8,1,1,1,3456,Int8,1,1,1,"BN, Swish",Conv_7,1,2.17E-02,4.31E-01,3.30E-03
+Conv_DW_9,Convolution_DW,56,56,144,Int8,56,56,144,Int8,3,3,1,144,Int8,1,1,144,"BN, Swish",Conv_8,1,8.13E-03,4.31E-01,1.24E-03
+AvgPool_10_1,AvgPool,56,56,144,Int8,1,1,144,Int8,,,,,Int8,1,1,1,,Conv_DW_9,,,,
+Conv_10_1,Convolution,1,1,144,Int8,1,1,6,Int8,1,1,1,864,Int8,1,1,1,"BN, Swish",AvgPool_10_1,1,1.73E-06,5.72E-06,8.24E-04
+Conv_10_2,Convolution,1,1,6,Int8,1,1,144,Int8,1,1,1,864,Int8,1,1,1,BN ,Conv_10_1,1,1.73E-06,1.37E-04,8.24E-04
+Sigmoid_10,Sigmoid,1,1,144,Int8,1,1,144,Int8,,,,,Int8,,,,,Conv_10_2,,,,
+BroadCast Mul_10,BroadCast_Mul,1,1,144,Int8,56,56,144,Int8,,,,,Int8,,,,,"Sigmoid_10, Conv_9",,,,
+Conv_11,Convolution,56,56,144,Int8,56,56,24,Int8,1,1,1,3456,Int8,1,1,1,BN,BroadCast Mul_10,1,2.17E-02,7.18E-02,3.30E-03
+Add_11,Add,56,56,24,Int8,56,56,24,Int8,,,,,Int8,,,,,"Conv_11, Conv_7",,,,
+Conv_12,Convolution,56,56,24,Int8,56,56,144,Int8,1,1,1,3456,Int8,1,1,1,"BN, Swish",Add_11,1,2.17E-02,4.31E-01,3.30E-03
+Conv_DW_13,Convolution_DW,56,56,144,Int8,28,28,144,Int8,5,5,1,216,Int8,2,2,96,"BN, Swish",Conv_12,1,8.47E-03,1.08E-01,5.15E-03
+AvgPool_14_1,AvgPool,28,28,144,Int8,1,1,144,Int8,,,,,Int8,1,1,1,,Conv_DW_13,,,,
+Conv_14_1,Convolution,1,1,144,Int8,1,1,6,Int8,1,1,1,864,Int8,1,1,1,"BN, Swish",AvgPool_14_1,1,1.73E-06,5.72E-06,8.24E-04
+Conv_14_2,Convolution,1,1,6,Int8,1,1,144,Int8,1,1,1,864,Int8,1,1,1,BN ,Conv_14_1,1,1.73E-06,1.37E-04,8.24E-04
+Sigmoid_14,Sigmoid,1,1,144,Int8,1,1,144,Int8,,,,,Int8,,,,,Conv_14_2,,,,
+BroadCast Mul_14,BroadCast_Mul,1,1,144,Int8,28,28,144,Int8,,,,,Int8,,,,,"Sigmoid_14, Conv_DW_13",,,,
+Conv_15,Convolution,28,28,144,Int8,28,28,40,Int8,1,1,1,5760,Int8,1,1,1,"BN, Swish",BroadCast Mul_14,1,9.03E-03,2.99E-02,5.49E-03
+Conv_16,Convolution,28,28,40,Int8,28,28,240,Int8,1,1,1,9600,Int8,1,1,1,"BN, Swish",Conv_15,1,1.51E-02,1.79E-01,9.16E-03
+Conv_DW_17,Convolution_DW,28,28,240,Int8,28,28,240,Int8,3,3,1,240,Int8,1,1,240,"BN, Swish",Conv_16,1,3.39E-03,1.79E-01,2.06E-03
+AvgPool_18_1,AvgPool,28,28,240,Int8,1,1,240,Int8,,,,,Int8,1,1,1,,Conv_DW_17,,,,
+Conv_18_1,Convolution,1,1,240,Int8,1,1,10,Int8,1,1,1,2400,Int8,1,1,1,"BN, Swish",AvgPool_18_1,1,4.80E-06,9.54E-06,2.29E-03
+Conv_18_2,Convolution,1,1,10,Int8,1,1,240,Int8,1,1,1,2400,Int8,1,1,1,BN ,Conv_18_1,1,4.80E-06,2.29E-04,2.29E-03
+Sigmoid_18,Sigmoid,1,1,240,Int8,1,1,240,Int8,,,,,Int8,,,,,Conv_18_2,,,,
+BroadCast Mul_18,BroadCast_Mul,1,1,240,Int8,28,28,240,Int8,,,,,Int8,,,,,"Sigmoid_10, Conv_9",,,,
+Conv_19,Convolution,28,28,240,Int8,28,28,40,Int8,1,1,1,9600,Int8,1,1,1,BN,BroadCast Mul_18,1,1.51E-02,2.99E-02,9.16E-03
+Add_19,Add,28,28,40,Int8,28,28,40,Int8,,,,,Int8,,,,,"Conv_19, Conv_15",,,,
+Conv_20,Convolution,28,28,40,Int8,28,28,240,Int8,1,1,1,9600,Int8,1,1,1,"BN, Swish",Add_19,1,1.51E-02,1.79E-01,9.16E-03
+Conv_DW_21,Convolution_DW,28,28,240,Int8,14,14,240,Int8,3,3,1,240,Int8,2,2,240,"BN, Swish",Conv_20,1,8.47E-04,4.49E-02,2.06E-03
+AvgPool_12_1,AvgPool,14,14,240,Int8,1,1,240,Int8,,,,,Int8,1,1,1,,Conv_DW_21,,,,
+Conv_22_1,Convolution,1,1,240,Int8,1,1,10,Int8,1,1,1,2400,Int8,1,1,1,"BN, Swish",AvgPool_12_1,1,4.80E-06,9.54E-06,2.29E-03
+Conv_22_2,Convolution,1,1,10,Int8,1,1,240,Int8,1,1,1,2400,Int8,1,1,1,BN ,Conv_22_1,1,4.80E-06,2.29E-04,2.29E-03
+Sigmoid_22,Sigmoid,1,1,240,Int8,1,1,240,Int8,,,,,Int8,,,,,Conv_22_2,,,,
+BroadCast Mul_22,BroadCast_Mul,1,1,240,Int8,14,14,240,Int8,,,,,Int8,,,,,"Sigmoid_22, Conv_",,,,
+Conv_23,Convolution,14,14,240,Int8,14,14,80,Int8,1,1,1,19200,Int8,1,1,1,"BN, Swish",BroadCast Mul_22,1,7.53E-03,1.50E-02,1.83E-02
+Conv_24,Convolution,14,14,80,Int8,14,14,480,Int8,1,1,1,38400,Int8,1,1,1,"BN, Swish",Conv_23,1,1.51E-02,8.97E-02,3.66E-02
+Conv_DW_25,Convolution_DW,14,14,480,Int8,14,14,480,Int8,3,3,1,480,Int8,1,1,480,"BN, Swish",Conv_24,1,1.69E-03,8.97E-02,4.12E-03
+AvgPool_26_1,AvgPool,14,14,480,Int8,1,1,480,Int8,,,,,Int8,1,1,1,,Conv_DW_25,,,,
+Conv_26_1,Convolution,1,1,480,Int8,1,1,20,Int8,1,1,1,9600,Int8,1,1,1,"BN, Swish",AvgPool_26_1,1,1.92E-05,1.91E-05,9.16E-03
+Conv_26_2,Convolution,1,1,20,Int8,1,1,480,Int8,1,1,1,9600,Int8,1,1,1,BN ,Conv_26_1,1,1.92E-05,4.58E-04,9.16E-03
+Sigmoid_26,Sigmoid,1,1,480,Int8,1,1,480,Int8,,,,,Int8,,,,,Conv_26_2,,,,
+BroadCast Mul_26,BroadCast_Mul,1,1,480,Int8,14,14,480,Int8,,,,,Int8,,,,,"Sigmoid_26, Conv_DW_25",,,,
+Conv_27,Convolution,14,14,480,Int8,14,14,80,Int8,1,1,1,38400,Int8,1,1,1,BN,BroadCast Mul_26,1,1.51E-02,1.50E-02,3.66E-02
+Add_27,Add,14,14,80,Int8,14,14,80,Int8,,,,,Int8,,,,,"Conv_27, Conv_23",,,,
+Conv_29,Convolution,14,14,80,Int8,14,14,480,Int8,1,1,1,38400,Int8,1,1,1,"BN, Swish",Add_27,1,1.51E-02,8.97E-02,3.66E-02
+Conv_DW_30,Convolution_DW,14,14,480,Int8,14,14,480,Int8,3,3,1,480,Int8,1,1,480,"BN, Swish",Conv_29,1,1.69E-03,8.97E-02,4.12E-03
+AvgPool_31_1,AvgPool,14,14,480,Int8,1,1,480,Int8,,,,,Int8,1,1,1,,Conv_DW_30,,,,
+Conv_31_1,Convolution,1,1,480,Int8,1,1,20,Int8,1,1,1,9600,Int8,1,1,1,"BN, Swish",AvgPool_31_1,1,1.92E-05,1.91E-05,9.16E-03
+Conv_31_2,Convolution,1,1,20,Int8,1,1,480,Int8,1,1,1,9600,Int8,1,1,1,BN ,Conv_31_1,1,1.92E-05,4.58E-04,9.16E-03
+Sigmoid_31,Sigmoid,1,1,480,Int8,1,1,480,Int8,,,,,Int8,,,,,Conv_31_2,,,,
+BroadCast Mul_31,BroadCast_Mul,1,1,480,Int8,14,14,480,Int8,,,,,Int8,,,,,"Sigmoid_26, Conv_DW_25",,,,
+Conv_32,Convolution,14,14,480,Int8,14,14,80,Int8,1,1,1,38400,Int8,1,1,1,BN,BroadCast Mul_31,1,1.51E-02,1.50E-02,3.66E-02
+Add_32,Add,14,14,80,Int8,14,14,80,Int8,,,,,Int8,,,,,"Conv_27, Conv_23",,,,
+Conv_33,Convolution,14,14,80,Int8,14,14,480,Int8,1,1,1,38400,Int8,1,1,1,"BN, Swish",Add_32,1,1.51E-02,8.97E-02,3.66E-02
+Conv_DW_34,Convolution_DW,14,14,480,Int8,14,14,480,Int8,5,5,1,480,Int8,1,1,480,"BN, Swish",Conv_33,1,4.70E-03,8.97E-02,1.14E-02
+AvgPool_35_1,AvgPool,14,14,480,Int8,1,1,480,Int8,,,,,Int8,1,1,1,,Conv_DW_34,,,,
+Conv_35_1,Convolution,1,1,480,Int8,1,1,20,Int8,1,1,1,9600,Int8,1,1,1,"BN, Swish",AvgPool_35_1,1,1.92E-05,1.91E-05,9.16E-03
+Conv_35_2,Convolution,1,1,20,Int8,1,1,480,Int8,1,1,1,9600,Int8,1,1,1,BN ,Conv_35_1,1,1.92E-05,4.58E-04,9.16E-03
+Sigmoid_35,Sigmoid,1,1,480,Int8,1,1,480,Int8,,,,,Int8,,,,,Conv_35_2,,,,
+BroadCast Mul_35,BroadCast_Mul,1,1,480,Int8,14,14,480,Int8,,,,,Int8,,,,,"Sigmoid_35, Conv_DW_34",,,,
+Conv_36,Convolution,14,14,480,Int8,14,14,112,Int8,1,1,1,53760,Int8,1,1,1,BN,BroadCast Mul_35,1,2.11E-02,2.09E-02,5.13E-02
+Conv_37,Convolution,14,14,112,Int8,14,14,672,Int8,1,1,1,75264,Int8,1,1,1,"BN, Swish",Conv_36,1,2.95E-02,1.26E-01,7.18E-02
+Conv_DW_38,Convolution_DW,14,14,672,Int8,14,14,672,Int8,5,5,1,672,Int8,1,1,672,"BN, Swish",Conv_37,1,6.59E-03,1.26E-01,1.60E-02
+AvgPool_39_1,AvgPool,14,14,672,Int8,1,1,672,Int8,,,,,Int8,1,1,1,,Conv_DW_38,,,,
+Conv_39_1,Convolution,1,1,672,Int8,1,1,28,Int8,1,1,1,18816,Int8,1,1,1,"BN, Swish",AvgPool_39_1,1,3.76E-05,2.67E-05,1.79E-02
+Conv_39_2,Convolution,1,1,28,Int8,1,1,672,Int8,1,1,1,18816,Int8,1,1,1,BN ,Conv_39_1,1,3.76E-05,6.41E-04,1.79E-02
+Sigmoid_39,Sigmoid,1,1,672,Int8,1,1,672,Int8,,,,,Int8,,,,,Conv_39_2,,,,
+BroadCast Mul_39,BroadCast_Mul,1,1,672,Int8,14,14,672,Int8,,,,,Int8,,,,,"Sigmoid_39, Conv_DW_38",,,,
+Conv_40,Convolution,14,14,672,Int8,14,14,112,Int8,1,1,1,75264,Int8,1,1,1,BN,BroadCast Mul_39,1,2.95E-02,2.09E-02,7.18E-02
+Add_40,Add,14,14,112,Int8,14,14,112,Int8,,,,,Int8,,,,,"Conv_40, Conv_36",,,,
+Conv_41,Convolution,14,14,112,Int8,14,14,672,Int8,1,1,1,75264,Int8,1,1,1,"BN, Swish",Add_40,1,2.95E-02,1.26E-01,7.18E-02
+Conv_DW_42,Convolution_DW,14,14,672,Int8,14,14,672,Int8,5,5,1,672,Int8,1,1,672,"BN, Swish",Conv_41,1,6.59E-03,1.26E-01,1.60E-02
+AvgPool_43_1,AvgPool,14,14,672,Int8,1,1,672,Int8,,,,,Int8,1,1,1,,Conv_DW_42,,,,
+Conv_43_1,Convolution,1,1,672,Int8,1,1,28,Int8,1,1,1,18816,Int8,1,1,1,"BN, Swish",AvgPool_43_1,1,3.76E-05,2.67E-05,1.79E-02
+Conv_43_2,Convolution,1,1,28,Int8,1,1,672,Int8,1,1,1,18816,Int8,1,1,1,BN ,Conv_43_1,1,3.76E-05,6.41E-04,1.79E-02
+Sigmoid_43,Sigmoid,1,1,672,Int8,1,1,672,Int8,,,,,Int8,,,,,Conv_43_2,,,,
+BroadCast Mul_43,BroadCast_Mul,1,1,672,Int8,14,14,672,Int8,,,,,Int8,,,,,"Sigmoid_26, Conv_DW_25",,,,
+Conv_44,Convolution,14,14,672,Int8,14,14,112,Int8,1,1,1,75264,Int8,1,1,1,BN,BroadCast Mul_43,1,2.95E-02,2.09E-02,7.18E-02
+Add_44,Add,14,14,112,Int8,14,14,112,Int8,,,,,Int8,,,,,"Conv_44, Conv_40",,,,
+Conv_45,Convolution,14,14,112,Int8,14,14,672,Int8,1,1,1,75264,Int8,1,1,1,"BN, Swish",Add_44,1,2.95E-02,1.26E-01,7.18E-02
+Conv_DW_46,Convolution_DW,14,14,672,Int8,7,7,672,Int8,5,5,1,672,Int8,2,2,672,"BN, Swish",Conv_45,1,1.65E-03,3.14E-02,1.60E-02
+AvgPool_47_1,AvgPool,7,7,672,Int8,1,1,672,Int8,,,,,Int8,1,1,1,,Conv_DW_46,,,,
+Conv_47_1,Convolution,1,1,672,Int8,1,1,28,Int8,1,1,1,18816,Int8,1,1,1,"BN, Swish",AvgPool_47_1,1,3.76E-05,2.67E-05,1.79E-02
+Conv_47_2,Convolution,1,1,28,Int8,1,1,672,Int8,1,1,1,18816,Int8,1,1,1,BN ,Conv_47_1,1,3.76E-05,6.41E-04,1.79E-02
+Sigmoid_47,Sigmoid,1,1,672,Int8,1,1,672,Int8,,,,,Int8,,,,,Conv_47_2,,,,
+BroadCast Mul_47,BroadCast_Mul,1,1,672,Int8,7,7,672,Int8,,,,,Int8,,,,,"Sigmoid_47, Conv_DW_46",,,,
+Conv_48,Convolution,7,7,672,Int8,7,7,192,Int8,1,1,1,129024,Int8,1,1,1,"BN, Swish",BroadCast Mul_47,1,1.26E-02,8.97E-03,1.23E-01
+Conv_49,Convolution,7,7,192,Int8,7,7,1152,Int8,1,1,1,221184,Int8,1,1,1,"BN, Swish",Conv_48,,,,
+Conv_DW_49,Convolution_DW,7,7,1152,Int8,7,7,1152,Int8,5,5,1,1152,Int8,1,1,1152,"BN, Swish",Conv_49,1,2.82E-03,5.38E-02,2.75E-02
+AvgPool_50_1,AvgPool,7,7,1152,Int8,1,1,1152,Int8,,,,,Int8,1,1,1,,Conv_DW_49,,,,
+Conv_50_1,Convolution,1,1,1152,Int8,1,1,48,Int8,1,1,1,55296,Int8,1,1,1,"BN, Swish",AvgPool_50_1,1,1.11E-04,4.58E-05,5.27E-02
+Conv_50_2,Convolution,1,1,48,Int8,1,1,1152,Int8,1,1,1,55296,Int8,1,1,1,BN ,Conv_50_1,1,1.11E-04,1.10E-03,5.27E-02
+Sigmoid_50,Sigmoid,1,1,1152,Int8,1,1,1152,Int8,,,,,Int8,,,,,Conv_50_2,,,,
+BroadCast Mul_50,BroadCast_Mul,1,1,1152,Int8,7,7,1152,Int8,,,,,Int8,,,,,"Sigmoid_50, Conv_DW_49",,,,
+Conv_51,Convolution,7,7,1152,Int8,7,7,192,Int8,1,1,1,221184,Int8,1,1,1,BN,BroadCast Mul_50,1,2.17E-02,8.97E-03,2.11E-01
+Add_51,Add,7,7,192,Int8,7,7,192,Int8,,,,,Int8,,,,,"Conv_51, Conv_48",,,,
+Conv_52,Convolution,7,7,192,Int8,7,7,1152,Int8,1,1,1,221184,Int8,1,1,1,"BN, Swish",Add_51,,,,
+Conv_DW_53,Convolution_DW,7,7,1152,Int8,7,7,1152,Int8,5,5,1,1152,Int8,1,1,1152,"BN, Swish",Conv_52,1,2.82E-03,5.38E-02,2.75E-02
+AvgPool_54_1,AvgPool,7,7,1152,Int8,1,1,1152,Int8,,,,,Int8,1,1,1,,Conv_DW_53,,,,
+Conv_54_1,Convolution,1,1,1152,Int8,1,1,48,Int8,1,1,1,55296,Int8,1,1,1,"BN, Swish",AvgPool_54_1,1,1.11E-04,4.58E-05,5.27E-02
+Conv_54_2,Convolution,1,1,48,Int8,1,1,1152,Int8,1,1,1,55296,Int8,1,1,1,BN ,Conv_54_1,1,1.11E-04,1.10E-03,5.27E-02
+Sigmoid_54,Sigmoid,1,1,1152,Int8,1,1,1152,Int8,,,,,Int8,,,,,Conv_54_2,,,,
+BroadCast Mul_54,BroadCast_Mul,1,1,1152,Int8,7,7,1152,Int8,,,,,Int8,,,,,"Sigmoid_54, Conv_DW_53",,,,
+Conv_55,Convolution,7,7,1152,Int8,7,7,192,Int8,1,1,1,221184,Int8,1,1,1,BN,BroadCast Mul_54,1,2.17E-02,8.97E-03,2.11E-01
+Add_55,Add,7,7,192,Int8,7,7,192,Int8,,,,,Int8,,,,,"Conv_55, Conv_51",,,,
+Conv_56,Convolution,7,7,192,Int8,7,7,1152,Int8,1,1,1,221184,Int8,1,1,1,"BN, Swish",Add_55,,,,
+Conv_DW_57,Convolution_DW,7,7,1152,Int8,7,7,1152,Int8,5,5,1,1152,Int8,1,1,1152,"BN, Swish",Conv_56,1,2.82E-03,5.38E-02,2.75E-02
+AvgPool_58_1,AvgPool,7,7,1152,Int8,1,1,1152,Int8,,,,,Int8,1,1,1,,Conv_DW_57,,,,
+Conv_58_1,Convolution,1,1,1152,Int8,1,1,48,Int8,1,1,1,55296,Int8,1,1,1,"BN, Swish",AvgPool_58_1,1,1.11E-04,4.58E-05,5.27E-02
+Conv_58_2,Convolution,1,1,48,Int8,1,1,1152,Int8,1,1,1,55296,Int8,1,1,1,BN ,Conv_58_1,1,1.11E-04,1.10E-03,5.27E-02
+Sigmoid_58,Sigmoid,1,1,1152,Int8,1,1,1152,Int8,,,,,Int8,,,,,Conv_58_2,,,,
+BroadCast Mul_58,BroadCast_Mul,1,1,1152,Int8,7,7,1152,Int8,,,,,Int8,,,,,"Sigmoid_58, Conv_DW_57",,,,
+Conv_59,Convolution,7,7,1152,Int8,7,7,192,Int8,1,1,1,221184,Int8,1,1,1,BN,BroadCast Mul_58,1,2.17E-02,8.97E-03,2.11E-01
+Add_59,Add,7,7,192,Int8,7,7,192,Int8,,,,,Int8,,,,,"Conv_56, Conv_59",,,,
+Conv_60,Convolution,7,7,192,Int8,7,7,1152,Int8,1,1,1,221184,Int8,1,1,1,"BN, Swish",Add_59,1,2.17E-02,5.38E-02,2.11E-01
+Conv_DW_61,Convolution_DW,7,7,1152,Int8,7,7,1152,Int8,3,3,1,1152,Int8,1,1,1152,"BN, Swish",Conv_60,1,1.02E-03,5.38E-02,9.89E-03
+AvgPool_62_1,AvgPool,7,7,1152,Int8,1,1,1152,Int8,,,,,Int8,1,1,1,,Conv_DW_61,,,,
+Conv_63_1,Convolution,1,1,1152,Int8,1,1,48,Int8,1,1,1,55296,Int8,1,1,1,"BN, Swish",AvgPool_62_1,1,1.11E-04,4.58E-05,5.27E-02
+Conv_63_2,Convolution,1,1,48,Int8,1,1,1152,Int8,1,1,1,55296,Int8,1,1,1,BN ,Conv_63_1,1,1.11E-04,1.10E-03,5.27E-02
+Sigmoid_63,Sigmoid,1,1,1152,Int8,1,1,1152,Int8,,,,,Int8,,,,,Conv_63_2,,,,
+BroadCast Mul_63,BroadCast_Mul,1,1,1152,Int8,7,7,1152,Int8,,,,,Int8,,,,,"Sigmoid_63, Conv_DW_61",,,,
+Conv_64,Convolution,7,7,1152,Int8,7,7,320,Int8,1,1,1,368640,Int8,1,1,1,BN,BroadCast Mul_63,1,3.61E-02,1.50E-02,3.52E-01
+Conv_65,Convolution,7,7,320,Int8,7,7,1280,Int8,1,1,1,409600,Int8,1,1,1,"BN, Swish",Conv_64,1,4.01E-02,5.98E-02,3.91E-01
+Global Average Pooling,AvgPool,7,7,1280,Int8,1,1,1280,Int8,,,,,Int8,,,,,Conv_65,,,,
+FC,MatMul,1,1,1280,Int8,1,1,1000,Int8,1,1,1,1280000,Int8,1,1,1,,Global Average Pooling,1,2.56E-03,9.54E-04,1.22E+00
+SoftMax,SoftMax,1,1,1000,Int8,1,1,1000,Int8,,,,,Int8,,,,,FC,,,,
+,,,,,,,,,,,,,,,,,,,,,7.55E-01,,4.36E+00
+,,,,,,,,,,,,,,,,,,,,,2.17E-02,,
+,,,,,,,,,,,,,,,,,,,,,6.67E-01,,
+,,,,,,,,,,,,,,,,,,,,,6.59E-02,,
