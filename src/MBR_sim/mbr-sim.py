@@ -14,12 +14,11 @@ def main(args):
    now = datetime.now() 
    dftime = now.strftime("%d_%m_%Y %H:%M:%S")
    directory = sys.path[0] + "/workloads/out/" + args.csv.split(".")[0].split("/")[-1] + " " + dftime
-   if not os.path.exists(directory):
+   if not os.path.exists(directory) and args.verbose != 0:
       os.makedirs(directory) 
    
    hw_cfg = configparser.ConfigParser()
    hw_cfg.read(args.config)
-
 
    csv_file = args.csv
    if (args.macbw is not None): hw_cfg['TILE']['MAC_BW'] = str(args.macbw)
@@ -58,16 +57,16 @@ def main(args):
    max_lyr_cycles = 0
    for node in graph.nodes:
       tot_MACS += node.MACS
-      tot_Weight += node.weight_size
       tot_lin_cycles += node.linear_cycles
       tot_tiles += node.tiles
       tot_lyr_cycles += node.layer_cycles
       tot_simd_cycles += node.simd_cycles
       max_lyr_cycles = max(max_lyr_cycles, node.layer_cycles)
+      tot_weight += node.weight_size
 
    print("Total SIMD Cycles: {:.2e}".format(tot_simd_cycles))
    print("Total MACS: {:.2e}".format(tot_MACS))
-   print("Total Weights: {:.2e}".format(tot_Weight))
+   print("Total Weight Size: {:.2e}".format(tot_weight))
    print("Mac Cycles: {:.2e}".format(tot_lin_cycles))
    if args.parallelism == "tensor":
       #Mac Util = (Total MACs/(MAC_bw * tot_tiles))/(max_lyr_cycles)

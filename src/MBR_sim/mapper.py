@@ -23,11 +23,12 @@ class Mapper:
         i = 1
         for index, row in df.iterrows():
             maxWgtCapacity = 0
-            if row['Type'] in linearTypes and self.hw_cfg['SYSTEM']['ENABLE_WEIGHT_SPLITTING'] == "1":
+            if row['Type'] in (linearTypes + dynamicLinear) and self.hw_cfg['SYSTEM']['ENABLE_WEIGHT_SPLITTING'] == "1":
                 maxWgtCapacity = int(self.hw_cfg['SYSTEM']['MAX_WEIGHT_CAPACITY'])
             node = Node(row['LyrName'])
             node.op_type = row['Type']
 
+            #Setting Datatypes
             node.inDatatype = row['InDatatype']
             node.outDatatype = row['OutDatatype']
             node.wgtDatatype = row['WgtDatatype']
@@ -35,13 +36,16 @@ class Mapper:
                 node.depthwise = int(row['DepthWise'])
             if 'Group' in df.columns and not pd.isnull(row['Group']):
                 node.group = int(row['Group'])
+            if 'Repeat' in df.columns and not pd.isnull(row['Repeat']):
+                node.repeats = int(row['Repeat'])
 
             if node.op_type in linearTypes:
                 node.convID = set([Node.convID])
                 Node.convID += 1
-                if self.hw_cfg['DATATYPE']['USE_GLOBAL'] == "1":
-                    node.inDatatype = args.input_datatype
-                    node.outDatatype = args.output_datatype
+            if self.hw_cfg['DATATYPE']['USE_GLOBAL'] == "1":
+                node.inDatatype = args.input_datatype
+                node.outDatatype = args.output_datatype
+                if node.op_type in linearTypes:
                     node.wgtDatatype = args.weight_datatype
 
 
@@ -79,7 +83,10 @@ class Mapper:
     def fuse_nodes(self):
         fusion.fuse_simd(self.graph, self.hw_cfg)
         fusion.inline_linear_simd(self.graph, self.hw_cfg)
+        fusion.split_repeats(self.graph, self.hw_cfg)
+        # fusion.combine_multiple_layers_threshold(self.graph, self.hw_cfg, 0.75)
         fusion.spread_layers_capped(self.graph, self.hw_cfg)
+        # fusion.spread_layers_threshold(self.graph, self.hw_cfg, 2)
         fusion.combine_multiple_layers_capped(self.graph, self.hw_cfg)
         fusion.two_pair_min(self.graph, self.hw_cfg)
         return self.graph

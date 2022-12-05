@@ -23,7 +23,7 @@ def fuse_simd(graph, hw_cfg):
             fusedNode.output_t_size = secondNode.output_t_size
             fusedNode.input_t_size = firstNode.input_t_size
             fusedNode.weight_t_size = firstNode.weight_t_size
-            fusedNode.weight_size = firstNode.weight_size
+            fusedNode.weight_size += secondNode.weight_size
             fusedNode.calculatePerf(hw_cfg)
 
             graph.nodes.pop(0)
@@ -55,7 +55,7 @@ def inline_linear_simd(graph, hw_cfg):
             fusedNode.output_t_size = secondNode.output_t_size
             fusedNode.input_t_size = firstNode.input_t_size
             fusedNode.weight_t_size = firstNode.weight_t_size
-            fusedNode.weight_size = firstNode.weight_size
+            fusedNode.weight_size += secondNode.weight_size
             fusedNode.calculatePerf(hw_cfg)
 
             graph.nodes.pop(0)
@@ -65,6 +65,17 @@ def inline_linear_simd(graph, hw_cfg):
     fused_nodes.extend(graph.nodes)
     graph.nodes = fused_nodes
     return graph
+
+def split_repeats(graph, hw_cfg):
+    splitNodes = []
+    for node in graph.nodes:
+        for i in range(node.repeats):
+            splitNode = node.copy()
+            splitNode.name += "_" + str(i)
+            splitNode.repeats = 1
+            splitNode.calculatePerf(hw_cfg)
+            splitNodes.append(splitNode)
+    graph.nodes = splitNodes
 
 def spread_layers_capped(graph, hw_cfg):
     while len(graph.nodes) < int(hw_cfg['SYSTEM']['TILES']):
@@ -227,7 +238,7 @@ def two_pair_min(graph, hw_cfg):
             excludedNodes.append(smallestNode)
             continue
         
-        if pairedNode.layer_cycles + smallestNode.layer_cycles > maxLayerCycles:
+        if pairedNode.layer_cycles + smallestNode.layer_cycles + 1 >= maxLayerCycles:
             excludedNodes.append(smallestNode)
             continue
         
@@ -260,6 +271,7 @@ def two_pair_min(graph, hw_cfg):
             split_node.weight_t_size[-1] //= 2 #Divde Input and Output tensors
             split_node.output_t_size[-1] //= 2
             split_node.input_t_size[-1] //= 2
+            split_node.weight_size //=2
             split_node.MACS //= 2
             split_node.simd_cycles //= 2
             split_node.calculatePerf(hw_cfg)

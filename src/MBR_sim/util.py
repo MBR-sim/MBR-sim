@@ -5,6 +5,7 @@ import MBR_sim.util as util
 # Node and Graph Class
 
 linearTypes = ["Convolution", "Convolution_DW", "MatMul"]
+dynamicLinear = ["MatMul-SIMD"]
 
 class Node ():
     uidCounter = 0
@@ -21,6 +22,7 @@ class Node ():
         self.group = 1
         self.tiles = None
         self.tile = None
+        self.repeats = 1
     
         self.inDatatype = ""
         self.outDatatype = ""
@@ -50,12 +52,12 @@ class Node ():
         self.output_t_size = self.output_t_size[:3] + [math.prod(self.output_t_size[:3])]
         if self.weight_t_size is not None:
             self.weight_t_size = self.weight_t_size[:4] + [math.prod(self.weight_t_size[:4])/self.group]
-            if initializeWeightSize:
+            if initializeWeightSize and self.op_type in linearTypes:
                 self.weight_size = self.weight_t_size[-1]
 
         self.load_cycles = self.input_t_size[3]//int(hw_cfg['TILE']['NOC_BW'])
         self.store_cycles = self.output_t_size[3]//int(hw_cfg['TILE']['NOC_BW'])
-        if any([linType in self.op_type for linType in util.linearTypes]):
+        if self.MACS != 0:
             self.linear_cycles = int(self.MACS//int(hw_cfg['TILE']['MAC_BW']))/simulate.mac_util(self, hw_cfg)
         else:
             self.linear_cycles = 0
@@ -90,14 +92,18 @@ class Node ():
         newNode.tile = self.tile
         newNode.group = self.group
         newNode.depthwise = self.depthwise
+        newNode.repeats = self.repeats
 
         newNode.inDatatype = self.inDatatype
         newNode.outDatatype = self.outDatatype
         newNode.wgtDatatype = self.wgtDatatype
     
-        newNode.input_t_size = self.input_t_size #(W, H, D, Size)
-        newNode.output_t_size = self.output_t_size #(W, H, D, Size)
-        newNode.weight_t_size = self.weight_t_size #(W, H, D, N, Size)
+        newNode.input_t_size = self.input_t_size.copy() #(W, H, D, Size)
+        newNode.output_t_size = self.output_t_size.copy() #(W, H, D, Size)
+        if self.weight_t_size is not None:
+            newNode.weight_t_size = self.weight_t_size.copy() #(W, H, D, N, Size)
+        else:
+            newNode.weight_t_size = None
         newNode.weight_size = self.weight_size
         newNode.ops_cnt = self.ops_cnt
         

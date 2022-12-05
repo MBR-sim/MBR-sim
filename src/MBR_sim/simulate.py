@@ -6,14 +6,16 @@ import math
 # Compute all kind of cycles
 def calculateSIMDCycles(graph, hw_cfg):
     for node in graph.nodes:
-        if (node.op_type not in util.linearTypes):
+        if (node.op_type not in (util.linearTypes + util.dynamicLinear)):
             op_type = node.op_type.upper()
             OutT = node.output_t_size[-1]
             if op_type in hw_cfg['SIMD_PERF_' + node.inDatatype.upper()]:
                 node.simd_cycles = OutT//(int(hw_cfg['TILE']['SIMD_BW'])/int(hw_cfg['SIMD_PERF_' + node.inDatatype.upper()][op_type]))
             else:
                 raise Exception("SIMD OP: {} NOT SUPPORTED".format(op_type)) #Don't Break, print warning and add defaults
-
+        elif node.op_type in util.dynamicLinear:
+            MACS = int(math.prod(node.output_t_size[:2]) * node.weight_t_size[0])
+            node.simd_cycles = MACS/256 #FIXME: Turn this into a variable, never have fixed variables
 def calculateMACS(graph, hw_cfg):
     for node in graph.nodes:
         if (node.op_type in util.linearTypes):
